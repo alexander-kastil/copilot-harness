@@ -11,12 +11,12 @@
 - Readers for Copilot Chat debug logs and the OpenTelemetry trace database, opened read-only through node:sqlite (#9).
 - Reader for VS Code chat session files across every installed VS Code variant, with incremental rescans (#8).
 - Reader for Copilot CLI session state: workspace, repository, branch, models, tool, subagent and skill counts, and every usage snapshot kept raw (#10).
-- CLAUDE.md for this repo: all tests are allowed.
+- CLAUDE.md for this repo: all tests, all deletes and starting and stopping processes are allowed.
 - Setup check card: the status of chat sessions, debug logs, the trace database and Copilot CLI data, with in-card buttons that switch on the opt-in sources (#11).
 - Credits card: reconciles local credit figures per source against the quota used, read from GitHub on request or typed in, and names the source of every figure (#13).
 - Snapshot store: every Copilot session kept as numbers only in the extension's storage, so sessions stay listed after Copilot deletes their files, with a size cap setting (#12).
-- Foundation: read the Copilot harness and its session data (#2)
-- Release build
+- Overview page like Claude Harness's: header with the asset and repository counts, one tile per customization kind, Last sessions, Repositories and Recently changed tabs with search, and the cards below.
+- BYOK models in Copilot Chat, ported from OAI Compatible Provider for Copilot and managed through the menu "Copilot Harness: Manage BYOK Models": providers, models and keys, five API modes, import from OAI Compatible, import and export, token meter and commit message generation (#38).
 
 ### Fixed
 
