@@ -16,6 +16,7 @@ Copilot Harness: a VS Code extension that does for the GitHub Copilot harness wh
 ## Hard Rules
 
 - All tests are allowed in this repo: the main session and every agent run any test without asking first (`npm test`, `npm run compile`, `node --test` on any test file, and the isolated VS Code checks).
+- All deletes are allowed in this repo, and so is starting and stopping processes: the main session and every agent do both without asking first.
 
 ## Working Method
 

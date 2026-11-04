@@ -2,7 +2,7 @@
   "name": "copilot-harness",
   "displayName": "Copilot Harness",
   "description": "Harness engineering for GitHub Copilot: see how your agents, skills, instructions and prompts work together across sessions and repositories.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "integrations-at",
   "license": "SEE LICENSE IN LICENSE",
   "icon": "media/icon.png",

@@ -16,6 +16,7 @@
 - Credits card: reconciles local credit figures per source against the quota used, read from GitHub on request or typed in, and names the source of every figure (#13).
 - Snapshot store: every Copilot session kept as numbers only in the extension's storage, so sessions stay listed after Copilot deletes their files, with a size cap setting (#12).
 - Foundation: read the Copilot harness and its session data (#2)
+- Release build
 
 ### Fixed
 
