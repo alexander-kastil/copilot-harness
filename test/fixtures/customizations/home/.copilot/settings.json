@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "p1@mk": true,
+    "p2@mk": false
+  }
+}

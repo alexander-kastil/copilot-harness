@@ -8,3 +8,7 @@ node_modules/
 *.pem
 *.pfx
 *.p12
+
+out/
+*.vsix
+media/webview/

@@ -1,0 +1,20 @@
+// SENTINEL header comment
+{
+  "installedPlugins": [
+    {
+      "name": "p1",
+      "marketplace": "mk",
+      "enabled": true
+    },
+    {
+      "name": "p2",
+      "marketplace": "mk",
+      "enabled": true
+    },
+    {
+      "name": "direct",
+      "marketplace": "",
+      "enabled": true
+    }
+  ]
+}

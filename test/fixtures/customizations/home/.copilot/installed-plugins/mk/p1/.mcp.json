@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "delta": {
+      "command": "SENTINEL_CMD"
+    }
+  }
+}

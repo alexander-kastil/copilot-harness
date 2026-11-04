@@ -1,0 +1,4 @@
+---
+applyTo: "**"
+---
+SENTINEL_BODY

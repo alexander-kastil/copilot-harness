@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "alpha": {
+      "type": "http",
+      "url": "SENTINEL_URL"
+    },
+    "beta": {
+      "command": "SENTINEL_CMD"
+    }
+  }
+}

@@ -1,0 +1,3 @@
+{"v":1,"ts":1786961553200,"dur":0,"sid":"sub1","type":"session_start","name":"session_start","spanId":"session-start-sub1","status":"ok","attrs":{"copilotVersion":"0.61.0","vscodeVersion":"1.144.1","parentSessionId":"sess-full","label":"runSubagent-Explore"}}
+{"ts":1786961553300,"dur":400,"sid":"sub1","type":"llm_request","name":"chat:gpt-5-mini","spanId":"s1","status":"ok","attrs":{"model":"gpt-5-mini","inputTokens":300,"outputTokens":20,"copilotUsageNanoAiu":500}}
+{"ts":1786961553800,"dur":50,"sid":"sub1","type":"tool_call","name":"grep","spanId":"s2","parentSpanId":"s1","status":"ok","attrs":{}}

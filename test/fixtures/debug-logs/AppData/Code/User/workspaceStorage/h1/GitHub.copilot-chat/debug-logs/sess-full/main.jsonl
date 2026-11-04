@@ -1,0 +1,8 @@
+{"v":1,"ts":1786961551000,"dur":0,"sid":"sess-full","type":"session_start","name":"session_start","spanId":"session-start-sess-full","status":"ok","attrs":{"copilotVersion":"0.61.0","vscodeVersion":"1.144.1"}}
+{"ts":1786961551100,"dur":0,"sid":"sess-full","type":"user_message","name":"user_message","spanId":"u1","status":"ok","attrs":{"content":"SENTINEL_PROMPT"}}
+{"ts":1786961552000,"dur":900,"sid":"sess-full","type":"llm_request","name":"chat:gpt-5","spanId":"c1","status":"ok","attrs":{"model":"gpt-5","inputTokens":1000,"outputTokens":50,"cachedTokens":400,"copilotUsageNanoAiu":2000,"systemPromptFile":"system_prompt_0.json","toolsFile":"tools_0.json","inputMessages":"SENTINEL_PROMPT"}}
+{"ts":1786961553000,"dur":100,"sid":"sess-full","type":"tool_call","name":"read_file","spanId":"t1","parentSpanId":"c1","status":"ok","attrs":{"args":"SENTINEL_PROMPT","result":"SENTINEL_PROMPT"}}
+{"ts":1786961553100,"dur":0,"sid":"sess-full","type":"child_session_ref","name":"runSubagent-Explore","spanId":"child-ref-sub1","parentSpanId":"t1","status":"ok","attrs":{"childSessionId":"sub1","childLogFile":"runSubagent-Explore-sub1.jsonl","label":"runSubagent-Explore"}}
+{"ts":1786961554000,"dur":500,"sid":"sess-full","type":"llm_request","name":"chat:gpt-5","spanId":"c2","status":"ok","attrs":{"model":"gpt-5","inputTokens":1200,"outputTokens":70,"cachedTokens":600}}
+{"ts":1786961554500,"dur":0,"sid":"sess-full","type":"agent_response","name":"agent_response","spanId":"a1","status":"ok","attrs":{"response":"SENTINEL_RESPONSE"}}
+{"truncated

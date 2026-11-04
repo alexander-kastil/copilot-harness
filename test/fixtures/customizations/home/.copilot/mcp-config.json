@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gamma": {
+      "type": "local",
+      "command": "SENTINEL_CMD"
+    }
+  }
+}

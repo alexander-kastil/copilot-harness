@@ -1,0 +1,6 @@
+{"kind":0,"v":{"version":3,"creationDate":1767026421052,"sessionId":"sess-1","requests":[],"inputState":{"inputText":"SENTINEL_PROMPT"}}}
+{"kind":2,"k":["requests"],"v":[{"requestId":"r1","timestamp":1767026500000,"modelId":"copilot/claude-haiku-4.5","message":{"text":"SENTINEL_PROMPT"},"copilotCredits":15.5,"promptTokens":1000,"completionTokens":200,"response":[{"kind":"markdownContent","value":"SENTINEL_RESPONSE"},{"kind":"toolInvocationSerialized"}],"modelState":{"value":1,"completedAt":1767026600000}}]}
+{"kind":2,"k":["requests"],"v":[{"requestId":"r2","timestamp":1767026700000,"modelId":"copilot/auto","message":{"text":"SENTINEL_PROMPT"},"result":{"usage":{"promptTokens":50,"completionTokens":7}},"response":[],"modelState":{"value":1,"completedAt":1767026800000}}]}
+{"kind":1,"k":["customTitle"],"v":"SENTINEL_TITLE"}
+{"kind":9,"k":["x"],"v":1}
+{"kind":2,"k":["requests"],"v":[{"requestId":"r3","timesta

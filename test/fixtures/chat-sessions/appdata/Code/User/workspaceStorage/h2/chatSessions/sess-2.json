@@ -1,0 +1,1 @@
+{"version":3,"sessionId":"sess-2","creationDate":1767030000000,"lastMessageDate":1767031000000,"requests":[{"requestId":"q1","timestamp":1767030100000,"modelId":"copilot/gpt-5","message":{"text":"SENTINEL_PROMPT"},"result":{"metadata":{"promptTokens":40,"outputTokens":5}},"response":[]}]}

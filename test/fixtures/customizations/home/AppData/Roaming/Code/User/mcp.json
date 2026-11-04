@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "epsilon": {
+      "type": "http",
+      "url": "SENTINEL_URL"
+    }
+  }
+}
