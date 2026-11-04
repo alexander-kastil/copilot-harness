@@ -123,8 +123,7 @@ The **PAYG models** tile opens a page with every BYOK provider (base URL, API mo
 ![The Source Control view with the generate commit message button, and the token meter in the status bar](docs/images/commit.png)
 
 - **Commit messages:** **Generate Commit Message with BYOK Model**, the wand in the Source Control title bar, writes the message with a model you marked for commit generation, in one of 14 languages and with your own prompt if you set one. It reads up to 24,000 characters of the staged diff, cut at a file boundary with the omitted files listed, and can write Gitmoji or plain messages. A progress notification has **Stop**.
-- **Pull request messages:** **Generate Pull Request Message with BYOK Model**, in the Source Control title bar and the Command Palette, writes a title and description from the branch's commits and its diff against the base branch, with the same model. The result opens as a Markdown document and is copied to the clipboard. Its prompt and base branch are settings on the Providers page.
-- **Moving from AI Commit:** the first time Copilot Harness runs, it takes over your AI Commit (`ai-commit.*`) settings once: provider, model, temperature, language and system prompt, with the API key moved into VS Code's secret storage. A notification names what moved. Your `ai-commit.*` settings stay as they are.
+- **Pull request messages:** **Generate Pull Request Message with BYOK Model**, in the Source Control title bar and the Command Palette, writes a title and description from the branch's commits and its diff against the base branch, with the same model. The result opens as a Markdown document and is copied to the clipboard. Its prompt and base branch are settings on the Providers 
 - **Token meter:** a status bar item shows how much of the current BYOK model's context the conversation uses, turns to a warning at 70% and an error at 90%, and opens Manage BYOK Models on click.
 
 ## License
