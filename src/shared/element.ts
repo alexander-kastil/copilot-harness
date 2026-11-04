@@ -1,6 +1,7 @@
 // The element page's data (one customization file) and the messages of the kind and element pages. No vscode import.
 // Change only by adding optional fields or union members.
 import type { ItemStatus, Kind } from './customizations';
+import type { SkillInfo } from './skills';
 
 export interface ElementField {
   key: string;
@@ -30,6 +31,8 @@ export interface ElementDetail {
   applyTo: string[];
   /** AGENTS.md only: the folder it applies to and whether VS Code chat loads it under the current settings. */
   agentsMd?: AgentsMdInfo;
+  /** Skills only: who loads the folder, spec problems, the npx source and the Codex file. */
+  skill?: SkillInfo;
 }
 
 export interface AgentsMdInfo {
@@ -39,6 +42,8 @@ export interface AgentsMdInfo {
   vscode: string;
   /** False when a setting keeps it from loading. */
   loaded: boolean;
+  /** The agents that read this file, per their documentation. */
+  readBy?: string;
 }
 
 export type ElementAiAction = 'edit' | 'try';

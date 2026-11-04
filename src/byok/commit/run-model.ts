@@ -31,7 +31,7 @@ export async function runCommitModel(
   const commitModels = userModels.filter((model: HFModelItem) => model.useForCommitGeneration === true);
   if (commitModels.length === 0) {
     throw new Error(
-      "No models configured for commit message generation. Please set 'useForCommitGeneration' to true for at least one model in your configuration.",
+      "No models configured for commit message generation. Set 'useForCommitGeneration' to true for at least one model.",
     );
   }
   const selected = commitModels[0];

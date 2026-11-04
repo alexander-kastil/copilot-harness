@@ -16,7 +16,8 @@ export type ToWebview =
   | import('./element').ElementToWebview
   | import('./hunt').HuntToWebview
   | import('./markets').MarketsToWebview
-  | import('./sessions').SessionsToWebview;
+  | import('./sessions').SessionsToWebview
+  | import('./skills').SkillsToWebview;
 
 /** Webview to host. */
 export type ToHost =
@@ -32,4 +33,5 @@ export type ToHost =
   | import('./payg').PaygToHost
   | import('./hunt').HuntToHost
   | import('./markets').MarketsToHost
-  | import('./sessions').SessionsToHost;
+  | import('./sessions').SessionsToHost
+  | import('./skills').SkillsToHost;

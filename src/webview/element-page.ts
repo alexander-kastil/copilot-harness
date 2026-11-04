@@ -12,7 +12,9 @@ import { showPage } from './pages';
 import { cmd, cmdBar, cmdBox } from './cmd-bar';
 import { aiGroup, askAi, prefs, rowsOpen, startAi } from './session-ui';
 import { onMarkets } from './market-data';
+import type { OpenAiInfo } from '../shared/skills';
 import { pluginBox } from './plugin-actions';
+import { askSkills } from './skills-ui';
 
 export interface Back {
   label: string;
@@ -26,14 +28,14 @@ export interface ElementPage {
   usage(message: Extract<ElementToWebview, { type: 'elementUsage' }>): void;
 }
 
-type TabId = 'content' | 'fields' | 'tools' | 'applies' | 'used';
+type TabId = 'content' | 'fields' | 'tools' | 'applies' | 'used' | 'codex';
 
 type Usage = Extract<ElementToWebview, { type: 'elementUsage' }>;
 let usage: Usage | undefined;
 
 const STATUS_TEXT: Record<string, string> = {
   ok: 'Valid',
-  invalid: 'Invalid: the frontmatter or JSON does not parse',
+  invalid: 'Invalid: the frontmatter or JSON does not parse, or a skill breaks the Agent Skills spec',
   incomplete: 'Incomplete: a required field is missing',
   unreadable: 'Unreadable',
   disabled: 'Disabled',
@@ -152,7 +154,7 @@ function usedCard(e: ElementEntry): HTMLElement {
                   'button',
                   {
                     className: 'icon-btn row-act',
-                    title: 'Analyze\nA new Copilot CLI in a terminal at the repository, asked to read this session and explain it. The session stays untouched.',
+                    title: 'Analyze\nA new Copilot CLI in a terminal at the repository reads and explains this session. The session is not changed.',
                     'aria-label': 'Analyze this session',
                     onclick: (ev: Event) => {
                       ev.stopPropagation();
@@ -186,6 +188,33 @@ function usedCard(e: ElementEntry): HTMLElement {
   return host;
 }
 
+const CODEX_NOTE = "policy.allow_implicit_invocation: false is Codex's counterpart of disable-model-invocation: the skill runs only when asked for by name.";
+
+/** The facts a skill page adds: who loads its folder, where npx installed it from and its Codex policy. */
+function skillFacts(d: ElementDetail): (HTMLElement | null)[] {
+  const s = d.skill;
+  if (!s) return [];
+  const src = s.source;
+  const from = src ? `${src.source}${src.sourceType ? ` (${src.sourceType})` : ''}` : '';
+  const fromTip = src ? [src.sourceUrl ?? src.source, src.skillPath, src.updatedAt ? `Updated ${src.updatedAt}` : '', src.hash ? `Hash ${src.hash}` : ''].filter(Boolean).join('\n') : '';
+  return [
+    s.loadedBy.length ? fact('Loaded by', 'organization', s.loadedBy.join(', '), `Loaded by\n${s.loadedBy.join(', ')} read skills from this folder.`) : null,
+    s.loadedBy.length && s.notReadBy.length ? fact('Not read by', 'circle-slash', s.notReadBy.join(', '), `Not read by\n${s.notReadBy.join(', ')} do not read skills from this folder.`) : null,
+    src ? fact('Installed from', 'package', from, fromTip) : null,
+    s.openai ? fact('Codex', 'file-code', s.openai.implicit ? 'agents/openai.yaml: Codex may pick it on its own' : 'agents/openai.yaml: only when asked for by name', CODEX_NOTE) : null,
+  ];
+}
+
+/** The Codex tab: agents/openai.yaml of the skill folder, key by key. */
+function codexCard(o: OpenAiInfo): HTMLElement {
+  return card(
+    'agents/openai.yaml',
+    o.fields.length,
+    el('div', { className: 'dv-notice' }, icon('info'), el('span', {}, `The file the Codex app reads for this skill. ${CODEX_NOTE}`)),
+    o.fields.length ? el('div', { className: 'dv-facts' }, o.fields.map((f) => fact(f.key, 'symbol-field', f.value, f.value))) : el('div', { className: 'dv-empty' }, 'The file is empty or does not parse.')
+  );
+}
+
 export function createElementPage(): ElementPage {
   const root = el('section', { className: 'main element-page' });
 
@@ -210,6 +239,18 @@ export function createElementPage(): ElementPage {
     );
   };
 
+  // A skill npx skills installed: check and update it from its source, each after a confirm card.
+  const skillBox = (e: ElementEntry): HTMLElement | null => {
+    const src = detail?.file === e.file ? detail.skill?.source : undefined;
+    if (!src) return null;
+    const lock = { global: src.global, path: src.path, label: src.global ? 'your home folder' : src.path.split(/[\\/]/).pop() || src.path };
+    return cmdBox(
+      'Skills',
+      cmd('refresh', 'Check for updates', 'Check for updates\nRuns npx skills check in a terminal, after you confirm. It changes nothing.', (ev) => askSkills(ev.currentTarget as HTMLElement, 'check', lock)),
+      cmd('sync', 'Update', `Update ${e.name}\nRuns npx skills update ${e.name} in a terminal, after you confirm.`, (ev) => askSkills(ev.currentTarget as HTMLElement, 'update', lock, e.name))
+    );
+  };
+
   const head = (e: ElementEntry, body: HTMLElement): HTMLElement =>
     el(
       'header',
@@ -220,7 +261,7 @@ export function createElementPage(): ElementPage {
         el(
           'div',
           { className: 'dh-line' },
-          el('span', { className: 'dh-kind', title: `${kindSingular(e.kind)}\nThe kind of element this page shows.` }, icon(kindIcon(e.kind)), el('span', {}, kindSingular(e.kind))),
+          el('span', { className: 'dh-kind', title: kindSingular(e.kind) }, icon(kindIcon(e.kind)), el('span', {}, kindSingular(e.kind))),
           el('h1', { title: e.name }, el('span', { className: 'dh-name' }, e.name)),
           sourceChip(e)
         ),
@@ -236,6 +277,7 @@ export function createElementPage(): ElementPage {
           cmd('folder-opened', 'Reveal', 'Reveal in File Explorer\nThe folder that holds the file.', () => post({ type: 'elementReveal', file: e.file }))
         ),
         pluginBox(e),
+        skillBox(e),
         aiActions(e, body)
       )
     );
@@ -253,7 +295,9 @@ export function createElementPage(): ElementPage {
       d.tools.length ? fact('Tools', 'tools', plural(d.tools.length, 'tool')) : null,
       d.applyTo.length ? fact('Applies to', 'filter', d.applyTo.join(', ')) : null,
       d.agentsMd ? fact('Applies to', 'filter', d.agentsMd.appliesTo) : null,
-      d.agentsMd ? fact('VS Code chat', d.agentsMd.loaded ? 'pass' : 'warning', d.agentsMd.vscode, d.agentsMd.vscode) : null,
+      d.agentsMd?.vscode ? fact('VS Code chat', d.agentsMd.loaded ? 'pass' : 'warning', d.agentsMd.vscode, d.agentsMd.vscode) : null,
+      d.agentsMd?.readBy ? fact('Read by', 'organization', d.agentsMd.readBy, d.agentsMd.readBy) : null,
+      ...skillFacts(d),
       e.readOnly ? fact('Edit', 'lock', `Read-only: update the plugin ${e.pluginId ?? ''} to change it`.trim()) : null,
     ];
     return el(
@@ -262,6 +306,7 @@ export function createElementPage(): ElementPage {
       el('div', { className: 'dv-kicker' }, kindSingular(e.kind), el('span', { className: 'dv-origin' }, e.scopeLabel)),
       description ? el('p', { className: 'dv-desc' }, description) : el('p', { className: 'dv-desc muted' }, KINDS[e.kind].markdown ? 'This file has no description.' : 'This kind has no description field.'),
       d.invalid ? el('div', { className: 'dv-notice warn' }, icon('warning'), el('span', {}, 'The frontmatter does not parse, so no field is shown.')) : null,
+      d.skill?.problems.length ? el('div', { className: 'dv-notice warn' }, icon('warning'), el('span', {}, `This SKILL.md breaks the Agent Skills spec: ${d.skill.problems.join('; ')}.`)) : null,
       el('div', { className: 'dv-facts' }, facts)
     );
   };
@@ -310,6 +355,9 @@ export function createElementPage(): ElementPage {
         : []),
       ...(e.kind === 'skill' || e.kind === 'deterministic'
         ? [{ id: 'used' as const, label: 'Used in', glyph: 'history', count: usage?.ready ? usage.sessions.length : undefined, body: () => usedCard(e) }]
+        : []),
+      ...(d.skill?.openai
+        ? [{ id: 'codex' as const, label: 'Codex', glyph: 'file-code', count: d.skill.openai.fields.length, body: () => codexCard(d.skill!.openai!) }]
         : []),
     ];
     if (!defs.some((t) => t.id === tab)) tab = 'content';

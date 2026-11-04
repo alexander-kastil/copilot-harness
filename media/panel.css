@@ -681,3 +681,8 @@ mark { background: color-mix(in srgb, var(--vscode-editor-findMatchBackground, #
 .ai-confirm.market-confirm .confirm-list { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--hx-muted); }
 .ai-confirm.market-confirm .confirm-list.scroll { max-height: 180px; overflow-y: auto; }
 .ai-confirm.market-confirm .confirm-line { overflow-wrap: anywhere; }
+.card[data-card="skills"] { grid-column: 1 / -1; }
+.skills-lock + .skills-lock { margin-top: 16px; }
+.skills-lock-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 8px; }
+.skills-lock-meta { color: var(--vscode-descriptionForeground); }
+.skills-lock-head .spacer { flex: 1; }

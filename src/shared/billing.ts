@@ -21,7 +21,7 @@ export interface BillingPlan {
 export const USD_PER_CREDIT = 0.01;
 
 export const BILLING_PLANS: BillingPlan[] = [
-  { id: 'free', label: 'Copilot Free', glyph: 'heart', allowance: 0, short: 'Free', note: 'GitHub publishes no AI-credit figure for Free: it has an allowance of AI credits and 2,000 code completions per month, which are not billed in credits. This shows the session in AI credits. Source: https://docs.github.com/en/copilot/concepts/billing/individual-plans' },
+  { id: 'free', label: 'Copilot Free', glyph: 'heart', allowance: 0, short: 'Free', note: 'GitHub publishes no AI-credit figure for Free: it has an allowance of AI credits and 2,000 code completions per month, which are not billed in credits. Source: https://docs.github.com/en/copilot/concepts/billing/individual-plans' },
   { id: 'pro', label: 'Copilot Pro', glyph: 'account', allowance: 1500, short: 'Pro' },
   { id: 'pro-plus', label: 'Copilot Pro+', glyph: 'rocket', allowance: 7000, short: 'Pro+' },
   { id: 'business', label: 'Copilot Business', glyph: 'organization', allowance: 1900, short: 'Business' },

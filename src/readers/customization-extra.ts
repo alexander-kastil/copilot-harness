@@ -144,6 +144,8 @@ export function classifyRules(items: CustomizationItem[]): CustomizationItem[] {
 
 const SKIP_DIRS = new Set(['node_modules', 'out', 'dist', 'build', 'bin', 'obj', 'target', 'vendor', '__pycache__']);
 const NESTED_DEPTH = 4;
+/** AGENTS.md and its variants: Codex's per-folder AGENTS.override.md, and AGENTS.local.md. */
+const AGENTS_FILES = ['AGENTS.md', 'AGENTS.override.md', 'AGENTS.local.md'];
 const NESTED_DIR_CAP = 1500;
 
 /** AGENTS.md files below the root (the nearest one to an edited file applies); dot folders and build output folders are not entered. */
@@ -159,8 +161,10 @@ export async function scanNestedAgentsMd(ctx: ScanContext, root: string): Promis
       return;
     }
     entries.sort((a, b) => a.name.localeCompare(b.name));
-    if (dir !== root && entries.some((e) => e.isFile() && e.name === 'AGENTS.md')) {
-      out.push(await markdownItem(ctx, 'instruction', path.join(dir, 'AGENTS.md'), path.relative(root, path.join(dir, 'AGENTS.md')).replace(/\\/g, '/')));
+    if (dir !== root) {
+      for (const name of AGENTS_FILES) {
+        if (entries.some((e) => e.isFile() && e.name === name)) out.push(await markdownItem(ctx, 'instruction', path.join(dir, name), path.relative(root, path.join(dir, name)).replace(/\\/g, '/')));
+      }
     }
     if (depth >= NESTED_DEPTH) return;
     for (const e of entries) {

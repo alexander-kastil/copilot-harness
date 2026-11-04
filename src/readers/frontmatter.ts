@@ -12,6 +12,8 @@ export interface Frontmatter {
   name?: string;
   /** True when `disable-model-invocation: true` or the deprecated `infer: false` is set. */
   disableModelInvocation?: boolean;
+  /** The parsed block, for the checks that need more than the key names (the Agent Skills spec). */
+  data?: Record<string, unknown>;
   // True when applyTo matches every file (a double star, with or without a trailing slash and star, alone or in a list): always on.
   alwaysOn?: boolean;
 }
@@ -37,7 +39,7 @@ export function parseFrontmatter(text: string): Frontmatter {
     const data: unknown = parseYaml(block);
     if (!data || typeof data !== 'object' || Array.isArray(data)) return { ok: false, present: true, keys: [] };
     const rec = data as Record<string, unknown>;
-    return { ok: true, present: true, keys: Object.keys(rec), name: typeof rec.name === 'string' && rec.name.trim() ? rec.name.trim() : undefined, disableModelInvocation: rec['disable-model-invocation'] === true || rec.infer === false, alwaysOn: appliesToEveryFile(rec.applyTo) };
+    return { ok: true, present: true, data: rec, keys: Object.keys(rec), name: typeof rec.name === 'string' && rec.name.trim() ? rec.name.trim() : undefined, disableModelInvocation: rec['disable-model-invocation'] === true || rec.infer === false, alwaysOn: appliesToEveryFile(rec.applyTo) };
   } catch {
     return { ok: false, present: true, keys: [] };
   }

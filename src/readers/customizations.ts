@@ -48,6 +48,8 @@ async function scanWorkspaceRoot(root: string, inParent: boolean): Promise<Custo
       path.join(gh, 'copilot-instructions.md'),
       path.join(root, '.copilot-instructions.md'),
       path.join(root, 'AGENTS.md'),
+      path.join(root, 'AGENTS.override.md'),
+      path.join(root, 'AGENTS.local.md'),
       path.join(root, 'CLAUDE.md'),
       path.join(claude, 'CLAUDE.md'),
     ]))
@@ -188,6 +190,8 @@ export async function readHome(env: Env): Promise<CustomizationItem[]> {
     ...(await scanMarkdownDir(ctx, path.join(claude, 'agents'), 'agent', ['.md'])),
     ...(await scanMcpFile(ctx, path.join(env.home, '.mcp.json'), 'mcpServers')),
     ...(await scanSkillFolders(ctx, [path.join(claude, 'skills'), path.join(env.home, '.agents', 'skills')])),
+    // Global AGENTS.md files other agents read: Codex's in ~/.codex, and the one Cline's docs name in ~/.agents.
+    ...(await scanNamedFiles(ctx, 'instruction', [path.join(env.home, '.codex', 'AGENTS.md'), path.join(env.home, '.agents', 'AGENTS.md')])).map((i) => ({ ...i, name: `${path.basename(path.dirname(i.file))}/AGENTS.md` })),
     ...(await scanHookFile(ctx, path.join(claude, 'settings.json'), 'hooks')),
   ];
 }

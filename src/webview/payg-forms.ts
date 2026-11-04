@@ -94,7 +94,7 @@ export function providerForm(ctx: FormCtx, existing: PaygProvider | undefined, d
     field('Base URL', textInput(d.baseUrl, (v) => (d.baseUrl = v), 'https://api.example.com'), 'The base URL of the API'),
     field('API mode', select([...API_MODES], d.apiMode, (v) => (d.apiMode = v as HFApiMode))),
     field('Headers', areaInput(d.headers, (v) => (d.headers = v), '{"x-org": "acme"}', 2), headersHint),
-    adding ? check('Ask for the API key next (VS Code password box, checked against the provider model list)', d.askKey, (v) => (d.askKey = v)) : null,
+    adding ? check('Ask for the API key next (VS Code password box)', d.askKey, (v) => (d.askKey = v)) : null,
     actions(err.node, btn(adding ? 'Add provider' : 'Save', save, { glyph: 'check' }), btn('Cancel', ctx.close, { secondary: true }))
   );
 }

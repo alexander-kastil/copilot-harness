@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-04
+
+### Added
+
+- Who loads it: a skill's page names the agents that load a skill from its folder (GitHub Copilot, Claude Code, Codex, Cursor, Gemini CLI, OpenCode, per their documentation) and the ones that do not, for .github, .claude, .agents and ~/.copilot skill folders.
+- Updates from the lock: a skill that npx skills add installed shows its npx source on its page, with Check for updates and Update buttons that run npx skills check and npx skills update (-g for global ones) in a terminal after a confirm card, and the new Skills installed with npx skills card on the Overview lists every locked skill of ~/.agents/.skill-lock.json and each repository's skills-lock.json.
+- Restore: when a skill that a repository's skills-lock.json lists is missing on disk, the card marks it and offers Restore missing, which runs npx skills experimental_install in that repository after a confirm card.
+- Spec check: a SKILL.md is checked against the Agent Skills spec (name matching the folder in lowercase a-z, 0-9 and single hyphens up to 64 characters, description 1 to 1024 characters, optional license, compatibility up to 500, metadata and allowed-tools); a skill that breaks it is marked incomplete or invalid like any file with a problem, and its page names each problem.
+- Codex file: a skill with agents/openai.yaml shows a Codex tab with the file's keys and a fact for policy.allow_implicit_invocation, Codex's counterpart of disable-model-invocation.
+- AGENTS.md variants: AGENTS.override.md (Codex's per-folder override) and AGENTS.local.md are listed at the repository root and below, and ~/.codex/AGENTS.md and ~/.agents/AGENTS.md are listed as global files; each page says which agents read the file per their documentation.
+
+### Changed
+
+- UI text, settings and README cut to the facts; filler, hype and em dashes removed.
+
+### Fixed
+
+- The scope picker of the Setup card and the quota box of the Credits card have a label for screen readers.
+- The kind page search box keeps Copilot capitalized in "Search Copilot Memory by name".
+
 ## [0.2.1] - 2026-11-04
 
 ### Fixed

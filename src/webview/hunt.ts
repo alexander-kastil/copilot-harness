@@ -92,12 +92,12 @@ function paint(root: HTMLElement): void {
       'div',
       { className: 'hunt-col hunt-col-find' },
       el('div', { className: 'hunt-col-head' }, icon('checklist'), el('span', {}, 'Findings and selections'), split.working ? el('span', { className: 'hunt-col-count' }, `${split.working.assets.filter((a) => a.include).length} selected`) : null),
-      split.working ? card(split.working) : el('div', { className: 'empty flush' }, hunt.info ? 'Nothing proposed yet. The skills and agents Copilot finds appear here, ready to keep or drop, once you send a message.' : reading)
+      split.working ? card(split.working) : el('div', { className: 'empty flush' }, hunt.info ? 'Nothing proposed yet.' : reading)
     )
   );
   const history = split.history.length
     ? el('div', { className: 'hunt-history' }, split.history.map((p) => card(p, true)))
-    : el('div', { className: 'empty flush' }, hunt.info ? 'No history yet. A plugin card you finish or set aside is kept here with its chat.' : reading);
+    : el('div', { className: 'empty flush' }, hunt.info ? 'No history yet.' : reading);
   const count = hunt.info?.catalog.length ?? 0;
   const head = el(
     'header',

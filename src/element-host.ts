@@ -3,9 +3,11 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import { isListedFile } from './nav-host';
+import { isListedFile, navListing } from './nav-host';
 import { HarnessPanel } from './panel';
-import { agentsMdInfo, editPrompt, readElement, tryCommand, type AgentsMdSettings } from './readers/element-view';
+import { agentsFileInfo, editPrompt, isAgentsFile, readElement, tryCommand, type AgentsMdSettings } from './readers/element-view';
+import { skillInfo } from './readers/skill-facts';
+import { currentEnv } from './readers/paths';
 import { skillUsage } from './readers/session-view';
 import type { SessionService } from './session-service';
 import { KINDS } from './shared/customizations';
@@ -20,6 +22,13 @@ function repoRootOf(file: string): string {
   for (let d = path.dirname(file); ; d = path.dirname(d)) {
     if (fs.existsSync(path.join(d, '.git')) || path.dirname(d) === d) return d;
   }
+}
+
+// The repository a skill folder belongs to, from the repositories the nav lists (the longest folder that holds the file); none for a home or plugin skill.
+function repoOfFile(file: string): string | undefined {
+  const lower = (p: string) => path.resolve(p).toLowerCase();
+  const folders = [...(navListing()?.repos ?? []).map((r) => r.path), ...(vscode.workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath)];
+  return folders.filter((d) => lower(file).startsWith(lower(d) + path.sep)).sort((a, b) => b.length - a.length)[0];
 }
 
 function agentsMdSettings(): AgentsMdSettings {
@@ -71,8 +80,9 @@ export function registerElements(context: vscode.ExtensionContext, sessions: Ses
             );
             return;
           }
-          void readElement(m.file, /\.(md|mdx)$/i.test(m.file)).then((detail) => {
-            if (path.basename(m.file) === 'AGENTS.md') detail.agentsMd = agentsMdInfo(m.file, repoRootOf(m.file), agentsMdSettings());
+          void readElement(m.file, /\.(md|mdx)$/i.test(m.file)).then(async (detail) => {
+            if (isAgentsFile(m.file)) detail.agentsMd = agentsFileInfo(m.file, repoRootOf(m.file), currentEnv().home, agentsMdSettings());
+            if (path.basename(m.file) === 'SKILL.md') detail.skill = await skillInfo(m.file, currentEnv().home, repoOfFile(m.file));
             HarnessPanel.post({ type: 'elementDetail', file: m.file, detail });
           });
           break;

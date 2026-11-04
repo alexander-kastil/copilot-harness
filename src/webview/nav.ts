@@ -481,7 +481,7 @@ export function createNav(host: HTMLElement, overview: Overview): Nav {
       'copilot',
       'copilot',
       'Copilot',
-      'Copilot\nWhat every Copilot session loads: instructions, prompt files, agents, skills, hooks, MCP servers and plugins from your user profile, ~/.copilot, your home folders and installed plugins.',
+      'Copilot\nWhat every Copilot session loads, from your user profile, ~/.copilot, your home folders and installed plugins.',
       [],
       q ? globalGroups.reduce((n, g) => n + g.items.filter((i) => itemMatches(g.kind, i, q)).length, 0) : total(globalGroups)
     );

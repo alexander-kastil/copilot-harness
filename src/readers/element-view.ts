@@ -4,6 +4,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { AgentsMdInfo, ElementDetail, ElementField } from '../shared/element';
+import { agentsReadBy } from './skill-facts';
 
 const MAX_BYTES = 256 * 1024;
 
@@ -27,6 +28,21 @@ export function agentsMdInfo(file: string, repoRoot: string, s: AgentsMdSettings
   if (!nested) return { appliesTo, loaded: true, vscode: `Attached to every Local chat request: ${on('useAgentsMdFile')}` };
   if (!s.useNestedAgentsMdFiles.value) return { appliesTo, loaded: false, vscode: `Not loaded: ${on('useNestedAgentsMdFiles')}` };
   return { appliesTo, loaded: true, vscode: `Listed for on-demand loading in Local sessions: ${on('useNestedAgentsMdFiles')}` };
+}
+
+/** The AGENTS file variants: Codex's AGENTS.override.md, AGENTS.local.md, and the global files in ~/.codex and ~/.agents. */
+export const isAgentsFile = (file: string): boolean => /^AGENTS(\.override|\.local)?\.md$/i.test(path.basename(file));
+
+/** AgentsMdInfo of any AGENTS file: AGENTS.md as before, a variant with who reads it, a global file with no folder to apply to. */
+export function agentsFileInfo(file: string, repoRoot: string, home: string, s: AgentsMdSettings): AgentsMdInfo {
+  const readBy = agentsReadBy(file, home);
+  const dir = path.dirname(file).toLowerCase();
+  if (dir === path.join(home, '.codex').toLowerCase() || dir === path.join(home, '.agents').toLowerCase()) {
+    return { appliesTo: 'Every session of the agents that read it, in every repository', vscode: '', loaded: false, ...(readBy ? { readBy } : {}) };
+  }
+  const info = agentsMdInfo(file, repoRoot, s);
+  if (path.basename(file).toLowerCase() === 'agents.md') return { ...info, ...(readBy ? { readBy } : {}) };
+  return { ...info, loaded: false, vscode: 'Not loaded: VS Code chat reads AGENTS.md only', ...(readBy ? { readBy } : {}) };
 }
 
 /** Splits a markdown file into its frontmatter fields and the text after them. */

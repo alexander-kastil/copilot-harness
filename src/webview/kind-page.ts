@@ -120,7 +120,7 @@ export function createKindPage(): KindPage {
     if (!p) return;
     const entries = entriesOf(p.kind);
     // Lower case in running text, but an acronym or a name such as MCP, CI, GitHub or GitHub Actions keeps its own casing.
-    const lower = kindLabel(p.kind).replace(/(?<!GitHub )\b[A-Z][a-z]+\b/g, (w) => w.toLowerCase());
+    const lower = kindLabel(p.kind).replace(/(?<!GitHub )\b(?!Copilot\b)[A-Z][a-z]+\b/g, (w) => w.toLowerCase());
     const results = el('div', { className: 'kind-results' });
     const filters = el('div', { className: 'filter-bar' });
     const suggest = el('div', { className: 'suggest', role: 'listbox', id: 'kind-suggest', hidden: true });
@@ -343,7 +343,7 @@ export function createKindPage(): KindPage {
         el(
           'div',
           { className: 'title' },
-          el('div', { className: 'dh-line' }, el('span', { className: 'dh-kind', title: `${kindLabel(p.kind)}\nThe kind of element this page lists.` }, icon(kindIcon(p.kind)), el('span', {}, 'Type')), el('h1', {}, kindLabel(p.kind))),
+          el('div', { className: 'dh-line' }, el('span', { className: 'dh-kind', title: kindLabel(p.kind) }, icon(kindIcon(p.kind)), el('span', {}, 'Type')), el('h1', {}, kindLabel(p.kind))),
           el('div', { className: 'path meta' }, `${entries.length} in ${plural(scopeCount, 'scope')}`)
         ),
         cmdBar(cmdBox('Page', cmd('arrow-left', 'Back', 'Back to the overview', () => showPage('overview'))))

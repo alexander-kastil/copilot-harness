@@ -1,8 +1,8 @@
 {
   "name": "copilot-harness",
   "displayName": "Copilot Harness",
-  "description": "Harness engineering for GitHub Copilot: see how your agents, skills, instructions and prompts work together across sessions and repositories.",
-  "version": "0.2.1",
+  "description": "See what your GitHub Copilot harness holds and what your sessions cost, and use your own models in Copilot Chat.",
+  "version": "0.3.0",
   "publisher": "integrations-at",
   "license": "SEE LICENSE IN LICENSE",
   "icon": "media/icon.png",
@@ -79,7 +79,7 @@
           "type": "number",
           "default": 50,
           "minimum": 1,
-          "markdownDescription": "Size cap of the snapshot store, in megabytes. The store keeps the figures of every Copilot session seen, so they survive Copilot deleting its logs. When the cap is exceeded the oldest records are removed first."
+          "markdownDescription": "Size cap of the snapshot store, in megabytes. The oldest records are removed first when it is exceeded."
         },
         "copilotHarness.byok.logLevel": {
           "type": "string",
@@ -91,12 +91,12 @@
             "warn",
             "error"
           ],
-          "description": "Debug log level. Logs are written to the extension's global storage folder byok-logs as JSON lines. Default is 'off' (no logging)."
+          "description": "Debug log level. Logs are JSON lines in the byok-logs folder of the extension's global storage. Default is 'off'."
         },
         "copilotHarness.byok.baseUrl": {
           "type": "string",
           "default": "https://router.huggingface.co/v1",
-          "description": "The base URL for the Openai Compatible Inference API. Default value is Hugging Face."
+          "description": "Base URL of the OpenAI-compatible API. Default is Hugging Face."
         },
         "copilotHarness.byok.models": {
           "type": "array",
@@ -110,7 +110,7 @@
               },
               "displayName": {
                 "type": "string",
-                "description": "(Optional) Display name for the model that will be shown in the Copilot interface. If not provided, will be generated automatically."
+                "description": "Display name in the Copilot model picker. Generated when empty."
               },
               "configId": {
                 "type": "string",
@@ -130,7 +130,7 @@
               },
               "family": {
                 "type": "string",
-                "description": "Model family (e.g., 'gpt-4', 'claude-3', 'gemini'). Enables model-specific optimizations and behaviors. Defaults to 'oai-compatible' if not specified."
+                "description": "Model family (for example 'gpt-4', 'claude-3', 'gemini'). Default is 'oai-compatible'."
               },
               "baseUrl": {
                 "type": "string",
@@ -206,7 +206,7 @@
                 "default": 0,
                 "minimum": 0,
                 "maximum": 2,
-                "description": "Sampling temperature (range: [0, 2]). Lower values make output more deterministic, higher values make it more creative. Default is 0."
+                "description": "Sampling temperature (range: [0, 2]). Default is 0."
               },
               "top_p": {
                 "type": "number",
@@ -297,7 +297,7 @@
                 "additionalProperties": {
                   "type": "string"
                 },
-                "description": "Custom HTTP headers to be sent with every request to this model's provider. These headers will be merged with the default headers (Authorization, Content-Type, User-Agent)."
+                "description": "Extra HTTP headers sent with every request to this model's provider, merged with Authorization, Content-Type and User-Agent."
               },
               "include_reasoning_in_request": {
                 "type": "boolean",
@@ -354,7 +354,7 @@
               }
             ]
           },
-          "description": "A list of preferred models to use. If provided, these models will be used directly instead of fetching from the API."
+          "description": "Preferred models. When set, they are used instead of fetching the list from the API."
         },
         "copilotHarness.byok.retry": {
           "type": "object",
@@ -422,7 +422,7 @@
         "copilotHarness.byok.commitMessagePrompt": {
           "type": "string",
           "default": "",
-          "description": "Custom system prompt for commit message generation. If not provided, uses the default prompt."
+          "description": "System prompt for commit messages. Empty uses the default."
         },
         "copilotHarness.byok.commitGitmoji": {
           "type": "boolean",
@@ -432,7 +432,7 @@
         "copilotHarness.byok.prMessagePrompt": {
           "type": "string",
           "default": "",
-          "description": "Custom system prompt for pull request title and description generation. If not provided, uses the default prompt."
+          "description": "System prompt for pull request titles and descriptions. Empty uses the default."
         },
         "copilotHarness.byok.prBaseBranch": {
           "type": "string",
@@ -444,7 +444,7 @@
           "default": 0,
           "minimum": 0,
           "maximum": 10000,
-          "description": "Number of lines to read when using `read_file` tool. Large lines may cost more tokens. Default is 0, let model decide lines."
+          "description": "Lines to read with the `read_file` tool. Default is 0: the model decides."
         }
       }
     },

@@ -88,7 +88,7 @@ export function sessionTable(list: SessionListRow[], label: string, host: HTMLEl
             'button',
             {
               className: 'icon-btn row-act',
-              title: 'Analyze\nA new Copilot CLI in a terminal at the repository, asked to read this session and explain it. The session stays untouched.',
+              title: 'Analyze\nA new Copilot CLI in a terminal at the repository reads and explains this session. The session is not changed.',
               'aria-label': 'Analyze this session',
               onclick: (e: Event) => {
                 e.stopPropagation();

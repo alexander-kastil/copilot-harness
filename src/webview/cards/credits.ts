@@ -103,6 +103,7 @@ function draw(): void {
   input.min = '0';
   input.step = 'any';
   input.placeholder = 'Quota used (credits)';
+  input.setAttribute('aria-label', 'Quota used (credits)');
   input.value = draft;
   input.addEventListener('input', () => (draft = input.value));
   form.append(
@@ -120,7 +121,7 @@ function draw(): void {
   host.append(form);
   if (s.githubQuota.note) host.append(el('div', 'credits-meta', s.githubQuota.note));
   host.append(
-    el('div', 'credits-meta', 'The GitHub read uses your VS Code GitHub sign-in for one request and stores nothing. The entry above is the fallback.')
+    el('div', 'credits-meta', 'The GitHub read uses your VS Code GitHub sign-in for one request and stores nothing.')
   );
 }
 

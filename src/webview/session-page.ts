@@ -163,13 +163,13 @@ export function createSessionPage(): SessionPage {
         cmdBox('Model', modelPicker()),
         aiGroup(
           '',
-          cmd('comment-discussion', 'Analyze', `Analyze\nA new Copilot CLI in a terminal${cwd}, asked to read this session and explain it. The session itself stays untouched.`, (ev) =>
+          cmd('comment-discussion', 'Analyze', `Analyze\nA new Copilot CLI in a terminal${cwd} reads and explains this session. The session is not changed.`, (ev) =>
             askAi(root, 'Analyze this session', 'Opens a new Copilot CLI in a terminal and asks it to read this session. It counts against your Copilot credits.', () => startAi('analyze', d.id, prefs.model), ev.currentTarget as HTMLElement)
           ),
           cmd(
             'debug-continue',
             'Continue',
-            d.resumable ? 'Continue session\nResumes this very session in Copilot CLI, in a terminal, so what you say is added to it. Analyze works on a read-only look instead.' : 'Continue session\nOnly sessions Copilot CLI wrote can be resumed.',
+            d.resumable ? 'Continue session\nResumes this session in Copilot CLI in a terminal; what you say is added to it.' : 'Continue session\nOnly sessions Copilot CLI wrote can be resumed.',
             (ev) => askAi(root, 'Continue this session', 'Resumes this session in Copilot CLI in a terminal. What you say there is added to the session and counts against your Copilot credits.', () => startAi('continue', d.id, prefs.model), ev.currentTarget as HTMLElement),
             !d.resumable
           )

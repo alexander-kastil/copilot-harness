@@ -52,7 +52,7 @@ function settingRow(s: SettingStatus, workspaceOpen: boolean): HTMLElement {
     warn.append(
       el('strong', undefined, 'Plain text warning. '),
       document.createTextNode(
-        'The trace database stores your prompts and responses in plain text on this machine. Turning off content capture is reported not to stop that. Only turn it on if you accept that.'
+        'The trace database stores your prompts and responses in plain text on this machine. Turning off content capture is reported not to stop that.'
       )
     );
     const actions = el('div', 'setup-actions');
@@ -73,6 +73,7 @@ function settingRow(s: SettingStatus, workspaceOpen: boolean): HTMLElement {
     if (!s.userOnly) {
       select = el('select', 'setup-scope');
       select.append(new Option('User settings', 'user'), new Option('Workspace settings', 'workspace'));
+      select.setAttribute('aria-label', 'Where to write the setting');
       select.disabled = !workspaceOpen;
       select.title = workspaceOpen ? 'Where the setting is written' : 'No folder is open, so only user settings are available';
       select.value = workspaceOpen ? scopeChoice.get(s.key) ?? 'user' : 'user';

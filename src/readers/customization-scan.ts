@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { parse as parseJsonc, type ParseError } from 'jsonc-parser';
 import type { CustomizationItem, ItemStatus, Kind, Scope } from '../shared/customizations';
 import { readFrontmatter } from './frontmatter';
+import { specProblems } from './skill-facts';
 
 /** What every item of one scan has in common. */
 export interface ScanContext {
@@ -106,7 +107,13 @@ export async function scanSkillsDir(ctx: ScanContext, dir: string): Promise<Cust
   for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     const skillFile = path.join(dir, e.name, 'SKILL.md');
     if (!(await isFile(skillFile))) continue;
-    const skill = await markdownItem(ctx, 'skill', skillFile, e.name, true);
+    let skill = await markdownItem(ctx, 'skill', skillFile, e.name, true);
+    // A SKILL.md that breaks the Agent Skills spec needs attention: incomplete when name or description is missing, invalid otherwise.
+    if (skill.status === 'ok') {
+      const data = (await readFrontmatter(skillFile))?.fm.data;
+      const problems = specProblems(e.name, data);
+      if (problems.length) skill = { ...skill, status: problems.some((p) => /is required$/.test(p)) ? 'incomplete' : 'invalid' };
+    }
     out.push((await isDeterministicSkill(path.join(dir, e.name), skillFile)) ? { ...skill, kind: 'deterministic' } : skill);
   }
   return out;

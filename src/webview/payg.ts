@@ -239,7 +239,7 @@ export function createPaygPage(kind: 'models' | 'providers'): PaygPage {
       { className: 'main-head' },
       btn('Overview', () => showPage('overview'), { secondary: true, glyph: 'arrow-left', title: 'Back to the overview' }),
       el('span', { className: 'big' }, icon('credit-card')),
-      el('div', { className: 'title' }, el('h1', {}, kind === 'models' ? 'PAYG models' : 'Providers'), el('div', { className: 'path meta' }, `${plural(state.models, 'model')} · ${plural(state.providers.length, 'provider')} · bring your own key`)),
+      el('div', { className: 'title' }, el('h1', {}, kind === 'models' ? 'PAYG models' : 'Providers'), el('div', { className: 'path meta' }, `${plural(state.models, 'model')} · ${plural(state.providers.length, 'provider')}`)),
       kind === 'models'
         ? btn('Providers', () => showPage('providers'), { secondary: true, glyph: 'server-environment', title: 'Open the providers page' })
         : btn('PAYG models', () => showPage('payg'), { secondary: true, glyph: 'credit-card', title: 'Open the PAYG models page' })
@@ -247,7 +247,7 @@ export function createPaygPage(kind: 'models' | 'providers'): PaygPage {
     const providers = section(
       'Providers',
       el('div', { className: 'payg-actions' }, btn('Add provider', () => open({ k: 'addProvider', d: providerDraft() }), { glyph: 'add' })),
-      state.providers.length ? gridTable(providerColumns(), state.providers, 'Providers') : el('div', { className: 'empty flush' }, 'No providers yet. Add a provider first, then its models.')
+      state.providers.length ? gridTable(providerColumns(), state.providers, 'Providers') : el('div', { className: 'empty flush' }, 'No providers yet.')
     );
     const known = new Set(state.providers.map((p) => p.id));
     const groups: [string, PaygModel[]][] = [
@@ -266,7 +266,7 @@ export function createPaygPage(kind: 'models' | 'providers'): PaygPage {
             )
           )
         )
-      : section('Models', el('div', { className: 'empty flush' }, 'No providers yet. Add a provider on the Providers page, then its models here.'));
+      : section('Models', el('div', { className: 'empty flush' }, 'No providers yet. Add one on the Providers page.'));
     const transfer = section(
       'Import and export',
       el(

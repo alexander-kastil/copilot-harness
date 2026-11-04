@@ -138,7 +138,7 @@ export function chatColumn(split: ReturnType<typeof import('./hunt-state').split
     el(
       'div',
       { className: 'hunt-chat-log', role: 'log', 'aria-live': 'polite' },
-      turns.length ? turns.map(turnRow) : el('div', { className: 'empty flush' }, 'Tell Copilot which skills and agents belong together. Its answers show up here and the plugin it proposes on the right.')
+      turns.length ? turns.map(turnRow) : el('div', { className: 'empty flush' }, 'Tell Copilot which skills and agents belong together.')
     ),
     composer(split.working)
   );

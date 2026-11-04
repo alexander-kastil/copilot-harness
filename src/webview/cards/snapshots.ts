@@ -29,7 +29,7 @@ function draw(): void {
     return;
   }
   host.append(
-    line(`${s.records} sessions kept as numbers only (no prompt or response text). Store ${mb(s.bytes)} of ${mb(s.maxBytes)} MB, from the snapshot store in this extension's storage.`),
+    line(`${s.records} sessions kept as numbers only (no prompt or response text). Store ${mb(s.bytes)} of ${mb(s.maxBytes)} MB.`),
     line(`${s.fromSnapshot} sessions are listed only from a snapshot because Copilot no longer has their files.`, 'snapshots-meta')
   );
   if (s.trimmedTotal > 0) {

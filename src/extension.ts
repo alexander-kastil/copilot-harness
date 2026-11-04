@@ -14,6 +14,7 @@ import { registerPayg } from './payg-host';
 import { registerPointers } from './pointers-host';
 import { registerHunt } from './hunt-host';
 import { registerMarkets } from './markets-host';
+import { registerSkills } from './skills-host';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(vscode.commands.registerCommand('copilotHarness.open', () => HarnessPanel.show(context)));
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerPointers(context, sessions);
   registerHunt(context);
   registerMarkets(context);
+  registerSkills(context);
   sessions.start();
 
   const status = vscode.window.createStatusBarItem('copilotHarness.status', vscode.StatusBarAlignment.Left, 0);

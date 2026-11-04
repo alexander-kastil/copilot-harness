@@ -14,8 +14,8 @@ const PICK_CAP = 80;
 const copyTag = (same: boolean, hasGlobal: boolean): HTMLElement => {
   const source = hasGlobal ? 'the global copy' : 'the copy marked plugin source above';
   return same
-    ? el('span', { className: 'tag', title: `Same as the source\nThis copy has the same content as ${source}, which the plugin is built from. Replacing it loses nothing.` }, 'same as source')
-    : el('span', { className: 'tag warn', title: `Differs from the source\nThis copy's content is not the same as ${source}, which the plugin is built from. Whatever only this copy has is lost if you switch Replace on: use Compare first to keep it.` }, 'differs from source');
+    ? el('span', { className: 'tag', title: `Same as the source\nSame content as ${source}. Replacing it loses nothing.` }, 'same as source')
+    : el('span', { className: 'tag warn', title: `Differs from the source\nThis copy differs from ${source}. Replace loses what only this copy has: use Compare first.` }, 'differs from source');
 };
 
 const kindIcon = (kind: string) => icon(kind === 'skill' ? 'mortar-board' : 'hubot');

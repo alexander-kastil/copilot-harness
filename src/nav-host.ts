@@ -24,6 +24,10 @@ const emptyAll = (): AllSessions => ({ chatSessions: emptyRead('chatSessions'), 
 
 let listedFiles = new Set<string>();
 let latestNav: NavState | undefined;
+const navBuiltEmitter = new vscode.EventEmitter<void>();
+
+/** Fires after every build of the nav listing. */
+export const onNavBuilt = navBuiltEmitter.event;
 
 /** The nav's latest listing of Global and every repository; the Plugin Hunter builds its catalog from it. */
 export const navListing = (): NavState | undefined => latestNav;
@@ -120,6 +124,7 @@ export function registerNav(context: vscode.ExtensionContext, sessions: SessionS
         listedFiles = known;
         state = { global: groupsOf(global, true), repos, sessionsReady: latest !== undefined };
         latestNav = state;
+        navBuiltEmitter.fire();
         post();
       } while (again);
     } catch {
