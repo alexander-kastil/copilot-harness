@@ -157,7 +157,7 @@ export function createMarketPages(): MarketPages {
     const body = el('div', { className: 'main-body' });
     body.append(notice() ?? '');
     if (!list) body.append(el('div', { className: 'empty flush' }, 'Reading the marketplaces...'));
-    else if (!list.length) body.append(el('div', { className: 'empty flush' }, 'No marketplace registered. Add one with the Add marketplace button.'));
+    else if (!list.length) body.append(el('div', { className: 'empty flush' }, 'No marketplace registered. Add one with copilot plugin marketplace add <source>.'));
     else {
       // The owner's own marketplaces, the directory sources on disk, come first as a group of their own.
       const local = list.filter((m) => m.kind === 'directory');

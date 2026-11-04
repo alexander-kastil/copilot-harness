@@ -119,7 +119,8 @@ export function createKindPage(): KindPage {
     const p = current;
     if (!p) return;
     const entries = entriesOf(p.kind);
-    const lower = kindLabel(p.kind).toLowerCase();
+    // Lower case in running text, but an acronym or a name such as MCP, CI, GitHub or GitHub Actions keeps its own casing.
+    const lower = kindLabel(p.kind).replace(/(?<!GitHub )\b[A-Z][a-z]+\b/g, (w) => w.toLowerCase());
     const results = el('div', { className: 'kind-results' });
     const filters = el('div', { className: 'filter-bar' });
     const suggest = el('div', { className: 'suggest', role: 'listbox', id: 'kind-suggest', hidden: true });

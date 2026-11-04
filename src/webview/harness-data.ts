@@ -2,7 +2,7 @@
 // every kind of the global scope and of each repository). Kinds come from the KINDS table, so a new kind needs no change here.
 import { KINDS, type Kind } from '../shared/customizations';
 import type { ElementEntry } from '../shared/element';
-import type { NavGroup, NavState } from '../shared/nav';
+import type { NavGroup, NavRepo, NavState } from '../shared/nav';
 
 const ICONS: Partial<Record<Kind, string>> = {
   instruction: 'book',
@@ -15,7 +15,7 @@ const ICONS: Partial<Record<Kind, string>> = {
   plugin: 'extensions',
   subagent: 'organization',
   tool: 'tools',
-  agentic: 'workflow',
+  agentic: 'type-hierarchy',
   ci: 'play-circle',
   env: 'vm',
   governance: 'shield',
@@ -42,10 +42,17 @@ function collect(groups: NavGroup[], scope: (pluginId?: string) => [string, stri
   );
 }
 
+/** A repository's scope label: its folder name, with the parent folder added when another repository has the same name. */
+function repoLabel(repo: NavRepo, all: NavRepo[]): string {
+  if (!all.some((r) => r !== repo && r.name.toLowerCase() === repo.name.toLowerCase())) return repo.name;
+  const parent = repo.path.split(/[\\/]+/).filter(Boolean).slice(-2, -1)[0];
+  return parent ? `${repo.name} (${parent})` : repo.name;
+}
+
 export function setNavData(state: NavState): void {
   entries = [
     ...collect(state.global, (plugin) => (plugin ? [PLUGIN_SCOPE, 'Plugins'] : [GLOBAL_SCOPE, 'Global'])),
-    ...state.repos.flatMap((r) => collect(r.groups, (plugin) => (plugin ? [PLUGIN_SCOPE, 'Plugins'] : [r.path, r.name]))),
+    ...state.repos.flatMap((r) => collect(r.groups, (plugin) => (plugin ? [PLUGIN_SCOPE, 'Plugins'] : [r.path, repoLabel(r, state.repos)]))),
   ];
   for (const fn of listeners) fn();
 }

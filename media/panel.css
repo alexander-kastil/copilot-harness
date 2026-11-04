@@ -415,6 +415,7 @@ mark { background: color-mix(in srgb, var(--vscode-editor-findMatchBackground, #
 .dg-modes { display: inline-flex; margin: 0; padding: 0; border: 1px solid var(--hx-line); border-radius: 6px; overflow: hidden; background: var(--vscode-editor-background); }
 .view-tab.dg-mode { flex: none; height: 24px; min-height: 0; border: 0; border-radius: 0; background: transparent; color: var(--vscode-button-secondaryForeground); font-size: 12px; font-weight: 500; }
 .view-tab.dg-mode:hover:not(:disabled) { background: var(--hx-hover); color: var(--vscode-foreground); }
+.view-tab.dg-mode.active, .view-tab.dg-mode.active:hover:not(:disabled) { background: var(--hx-on); color: var(--hx-on-ink); font-weight: 600; }
 .view-tab.dg-mode:focus-visible { outline: 1px solid var(--hx-focus); outline-offset: -1px; }
 .dg-modes > .view-tab.dg-mode + .view-tab.dg-mode, .ai-group > .view-tab.dg-mode + .view-tab.dg-mode { border-left: 1px solid var(--hx-line); }
 .view-tab:disabled { opacity: 0.5; cursor: default; }

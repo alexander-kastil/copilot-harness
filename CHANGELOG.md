@@ -2,28 +2,23 @@
 
 ## [Unreleased]
 
-### Added
-
-- Split Providers and Models pages: The Models and Providers pages are split, and the Overview has a "Providers" tile beside "PAYG models"
-- Sessions pages and AI features: I built the Sessions page and the session detail page
-- Update .vscodeignore, azure-pipelines.yml
-- Update src
-- Update src, test
-- Update test
-- Drop CLAUDE.md, add six tiles: Copilot Memory now shows as its own kind, "Copilot Memory", in the nav (global and per repository), the
-- Claude Harness UI style and AI actions: The element page now opens a Copilot Memory item's url in the browser and no longer opens or
-- Drop CLAUDE.md, add six tiles: Skills are now split into two kinds, and both show in the Overview tiles, the nav (global and per
-- Update CLAUDE.md
-- Update docs
-- README feature screenshots: All 11 images are in and linked once each in README.md: the hero under # Copilot Harnes
-- Update src, tasks
-- AI Commit features and settings migration: Commit messages, PR messages and the one-time migration all work
-- AGENTS.md support like Claude Harness, and what GitHub's and VS Code's docs say AGENTS.md does
+## [0.2.1] - 2026-11-04
 
 ### Fixed
 
-- Claude Harness UI style and AI actions: A skill's element page now has a "Used in" tab, and the isolated VS Code check shows the fixture
-
+- The Agentic Workflows tile and nav item show their icon again (the glyph name did not exist in the icon font).
+- The selected plan of the Billing switch on a session page is highlighted again.
+- The tabs of the Overview and of the Plugin Hunter can be reached with the arrow keys, Home and End, not only by mouse.
+- A deterministic skill's element page shows the Used in tab, like an orchestration skill's.
+- Back on a session opened from a skill's Used in tab returns to the skill, not to the Overview.
+- Analyze on a Sessions page row opens its confirm card under the button instead of at the top of the list.
+- The Copilot region count in the nav follows the nav search, like the Repositories region.
+- Token counts just under a million read 1.0 M instead of 1000 k.
+- The Marketplace health empty state names the command that adds a marketplace instead of a button that does not exist.
+- Two repositories with the same folder name are told apart on kind pages and element pages (the parent folder is added to the name) instead of showing identical scopes.
+- The Add provider, Add models and Edit model forms close on Esc and save on Enter in a text box, like the other forms of the panel.
+- The kind page search box keeps the casing of acronyms and names in the kind's name ("Search MCP servers", not "mcp servers"; "GitHub Actions").
+- A skill installed in two skill folders of a repository or of the home folder (for example .claude/skills and .agents/skills, as npx skills add does) is listed once instead of twice, and counted once.
 
 
 ## [0.2.0] - 2026-11-04

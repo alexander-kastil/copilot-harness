@@ -60,7 +60,7 @@ export function showElement(next: ElementEntry, from?: Back): void {
   redraw?.();
   post({ type: 'elementOpen', file: entry.file });
   usage = undefined;
-  if (entry.kind === 'skill') post({ type: 'elementUsageOpen', name: entry.name });
+  if (entry.kind === 'skill' || entry.kind === 'deterministic') post({ type: 'elementUsageOpen', name: entry.name });
   showPage('element');
 }
 
@@ -308,7 +308,7 @@ export function createElementPage(): ElementPage {
       ...(d.applyTo.length
         ? [{ id: 'applies' as const, label: 'Applies to', glyph: 'filter', count: d.applyTo.length, body: () => card('Applies to', d.applyTo.length, el('div', { className: 'ref-list' }, d.applyTo.map((g) => el('div', { className: 'ref-row static' }, icon('filter'), el('span', { className: 'ref-name' }, g))))) }]
         : []),
-      ...(e.kind === 'skill'
+      ...(e.kind === 'skill' || e.kind === 'deterministic'
         ? [{ id: 'used' as const, label: 'Used in', glyph: 'history', count: usage?.ready ? usage.sessions.length : undefined, body: () => usedCard(e) }]
         : []),
     ];
@@ -360,7 +360,7 @@ export function createElementPage(): ElementPage {
   return {
     root,
     usage(message) {
-      if (!entry || entry.kind !== 'skill' || message.name.toLowerCase() !== entry.name.toLowerCase()) return;
+      if (!entry || (entry.kind !== 'skill' && entry.kind !== 'deterministic') || message.name.toLowerCase() !== entry.name.toLowerCase()) return;
       usage = message;
       redraw?.();
     },

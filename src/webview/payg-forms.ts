@@ -34,7 +34,25 @@ export interface ModelsDraft {
 
 const URL_RE = /^https?:\/\/\S+$/;
 
-const formBox = (title: string, ...children: (HTMLElement | null)[]): HTMLElement => el('div', { className: 'payg-form' }, el('h3', {}, title), ...children);
+/** A form: Enter in a text box saves it and Esc closes it, like the confirm cards of the panel. */
+const formBox = (title: string, keys: { save(): void; cancel(): void }, ...children: (HTMLElement | null)[]): HTMLElement =>
+  el(
+    'div',
+    {
+      className: 'payg-form',
+      onkeydown: (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          keys.cancel();
+        } else if (e.key === 'Enter' && e.target instanceof HTMLInputElement && e.target.type === 'text' && !e.target.dataset.nosubmit) {
+          e.preventDefault();
+          keys.save();
+        }
+      },
+    },
+    el('h3', {}, title),
+    ...children
+  );
 
 function actions(error: HTMLElement, ...buttons: HTMLElement[]): HTMLElement {
   return el('div', { className: 'payg-actions' }, ...buttons, error);
@@ -71,6 +89,7 @@ export function providerForm(ctx: FormCtx, existing: PaygProvider | undefined, d
   };
   return formBox(
     adding ? 'Add provider' : `Edit provider ${existing!.id}`,
+    { save, cancel: ctx.close },
     id ? field('Provider ID', id, 'Stored in lower case, for example deepseek') : null,
     field('Base URL', textInput(d.baseUrl, (v) => (d.baseUrl = v), 'https://api.example.com'), 'The base URL of the API'),
     field('API mode', select([...API_MODES], d.apiMode, (v) => (d.apiMode = v as HFApiMode))),
@@ -126,10 +145,17 @@ export function addModelsForm(ctx: FormCtx, provider: PaygProvider, d: ModelsDra
     ctx.send({ type: 'paygAddModels', provider: provider.id, ids, contextLength: d.contextLength, maxTokens: d.maxTokens, vision: d.vision, displayName: d.displayName });
     ctx.close();
   };
+  // Enter in the filter box filters; it does not save the form.
+  const filterBox = () => {
+    const box = textInput(d.filter, (v) => { d.filter = v; drawChoices(); }, 'Type to filter');
+    box.dataset.nosubmit = '1';
+    return box;
+  };
   return formBox(
     `Add models to ${provider.id}`,
+    { save, cancel: ctx.close },
     load,
-    list && !list.error ? field('Filter the list', textInput(d.filter, (v) => { d.filter = v; drawChoices(); }, 'Type to filter')) : null,
+    list && !list.error ? field('Filter the list', filterBox()) : null,
     list && !list.error ? choices : null,
     field('Model IDs', textInput(d.manual, (v) => (d.manual = v), 'gpt-4o, deepseek-chat'), 'Several IDs separated with commas'),
     el('div', { className: 'payg-row' },
@@ -176,6 +202,7 @@ export function modelForm(ctx: FormCtx, model: PaygModel, d: Record<string, stri
   };
   return formBox(
     `Edit model ${model.label}`,
+    { save, cancel: ctx.close },
     el('div', { className: 'payg-hint' }, icon('info'), ' An empty field removes the value.'),
     grid,
     actions(err.node, btn('Save', save, { glyph: 'check' }), btn('Cancel', ctx.close, { secondary: true }))

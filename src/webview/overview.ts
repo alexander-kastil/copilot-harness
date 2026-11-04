@@ -24,7 +24,7 @@ const KIND_ICON: Record<Kind, string> = {
   plugin: 'extensions',
   subagent: 'organization',
   tool: 'tools',
-  agentic: 'workflow',
+  agentic: 'type-hierarchy',
   ci: 'play-circle',
   env: 'vm',
   governance: 'shield',
@@ -192,6 +192,17 @@ export function createOverview(cardsHost: HTMLElement): Overview {
               tab = id;
               drawTabs();
               drawList();
+            },
+            // The inactive tabs are out of the Tab order: the arrow keys move between them.
+            onkeydown: (e: KeyboardEvent) => {
+              const at = defs.findIndex((d) => d[0] === id);
+              const to = e.key === 'ArrowRight' ? (at + 1) % defs.length : e.key === 'ArrowLeft' ? (at - 1 + defs.length) % defs.length : e.key === 'Home' ? 0 : e.key === 'End' ? defs.length - 1 : -1;
+              if (to < 0) return;
+              e.preventDefault();
+              tab = defs[to][0];
+              drawTabs();
+              drawList();
+              tabsBox.querySelector<HTMLElement>('[role=tab][aria-selected=true]')?.focus();
             },
           },
           icon(glyph),

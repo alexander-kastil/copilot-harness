@@ -148,3 +148,26 @@ test('Copilot Memory: one item per repository with a GitHub remote, its switch a
   assert.equal(items.find((i) => i.url)?.url, 'https://github.com/acme/shop/settings/copilot/memory');
   assert.ok(!JSON.stringify(items).includes('SENTINEL'));
 });
+
+test('a skill installed in two skill folders is listed once, from the first folder', async () => {
+  const dupDir = path.join(work, 'dupskill');
+  for (const folder of [['.claude', 'skills'], ['.agents', 'skills']]) {
+    fs.mkdirSync(path.join(dupDir, ...folder, 'twin'), { recursive: true });
+    fs.writeFileSync(path.join(dupDir, ...folder, 'twin', 'SKILL.md'), '---\nname: twin\ndescription: Same skill\n---\nBody\n');
+  }
+  fs.mkdirSync(path.join(dupDir, '.agents', 'skills', 'solo'), { recursive: true });
+  fs.writeFileSync(path.join(dupDir, '.agents', 'skills', 'solo', 'SKILL.md'), '---\nname: solo\ndescription: Only here\n---\nBody\n');
+  const skills = (await readWorkspace({ workspaceFolders: [dupDir], parentLookup: false })).filter((i) => i.kind === 'skill');
+  assert.deepEqual(skills.map((i) => i.name).sort(), ['solo', 'twin']);
+  assert.ok(skills.find((i) => i.name === 'twin')!.file.includes('.claude'));
+
+  // The home scope: npx skills add -g copies a skill to ~/.claude/skills and ~/.agents/skills.
+  const dupHome = path.join(work, 'duphome');
+  for (const folder of [['.claude', 'skills'], ['.agents', 'skills']]) {
+    fs.mkdirSync(path.join(dupHome, ...folder, 'twin'), { recursive: true });
+    fs.writeFileSync(path.join(dupHome, ...folder, 'twin', 'SKILL.md'), '---\nname: twin\ndescription: Same skill\n---\nBody\n');
+  }
+  const homeSkills = (await readHome({ ...env, home: dupHome })).filter((i) => i.kind === 'skill');
+  assert.deepEqual(homeSkills.map((i) => i.name), ['twin']);
+  assert.ok(homeSkills[0].file.includes('.claude'));
+});

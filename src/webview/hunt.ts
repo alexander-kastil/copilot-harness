@@ -36,7 +36,18 @@ const tabBar = (tabs: [string, string, string, string, number?][], current: stri
     tabs.map(([id, text, glyph, about, count]) =>
       el(
         'button',
-        { className: `view-tab${id === current ? ' active' : ''}`, role: 'tab', 'aria-selected': id === current ? 'true' : 'false', tabindex: id === current ? '0' : '-1', title: `${text}\n${about}`, onclick: () => pick(id) },
+        { className: `view-tab${id === current ? ' active' : ''}`, role: 'tab', 'aria-selected': id === current ? 'true' : 'false', tabindex: id === current ? '0' : '-1', title: `${text}\n${about}`,
+          onclick: () => pick(id),
+          // The inactive tab is out of the Tab order: the arrow keys move between the tabs.
+          onkeydown: (e: KeyboardEvent) => {
+            const at = tabs.findIndex((t) => t[0] === id);
+            const to = e.key === 'ArrowRight' ? (at + 1) % tabs.length : e.key === 'ArrowLeft' ? (at - 1 + tabs.length) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+            if (to < 0) return;
+            e.preventDefault();
+            pick(tabs[to][0]);
+            queueMicrotask(() => [...document.querySelectorAll<HTMLElement>('[role=tablist]')].find((l) => l.getAttribute('aria-label') === label && l.offsetParent)?.querySelector<HTMLElement>('[aria-selected=true]')?.focus());
+          },
+        },
         icon(glyph),
         el('span', {}, text),
         count === undefined ? null : el('span', { className: 'tab-count' }, count)

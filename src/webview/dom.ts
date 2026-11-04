@@ -35,7 +35,7 @@ export const fmtAgo = (t: number | undefined): string => {
 
 export const fmtDate = (t: number): string => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-export const fmtNum = (n: number): string => (n >= 1e6 ? `${(n / 1e6).toFixed(1)} M` : n >= 1e3 ? `${Math.round(n / 1e3)} k` : String(n));
+export const fmtNum = (n: number): string => (n >= 999500 ? `${(n / 1e6).toFixed(1)} M` : n >= 1e3 ? `${Math.round(n / 1e3)} k` : String(n));
 
 export const fmtCredits = (n: number): string => n.toFixed(2);
 

@@ -136,7 +136,7 @@ export function createSessionPage(): SessionPage {
     // The command bar: every command in a labelled box (Page, Files), the AI group last at the right end.
     const pageBox = cmdBox(
       'Page',
-      cmd('arrow-left', 'Back', backTarget() === 'sessions' ? 'Back to the sessions' : 'Back to the overview', () => showPage(backTarget())),
+      cmd('arrow-left', 'Back', backTarget() === 'sessions' ? 'Back to the sessions' : backTarget() === 'element' ? 'Back to the element' : 'Back to the overview', () => showPage(backTarget())),
       cmd('refresh', 'Reload', 'Read the session again', () => {
         load();
         post({ type: 'sessionOpen', id });

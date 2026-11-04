@@ -22,6 +22,20 @@ import { copilotHome, currentEnv, userDataDirs, userDir, type Env } from './path
 const INSTRUCTION = ['.instructions.md'];
 const AGENT = ['.agent.md', '.md'];
 
+/** The skills of several skill folders; a name found in more than one folder is listed once, from the first. */
+async function scanSkillFolders(ctx: ScanContext, dirs: string[]): Promise<CustomizationItem[]> {
+  const names = new Set<string>();
+  const out: CustomizationItem[] = [];
+  for (const dir of dirs) {
+    for (const hit of await scanSkillsDir(ctx, dir)) {
+      if (names.has(hit.name.toLowerCase())) continue;
+      names.add(hit.name.toLowerCase());
+      out.push(hit);
+    }
+  }
+  return out;
+}
+
 /** The folders of one workspace root, or of a parent folder reached by the parent lookup. */
 async function scanWorkspaceRoot(root: string, inParent: boolean): Promise<CustomizationItem[]> {
   const ctx: ScanContext = { scope: 'workspace', inParent };
@@ -50,7 +64,8 @@ async function scanWorkspaceRoot(root: string, inParent: boolean): Promise<Custo
   out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'prompts'), 'prompt', ['.prompt.md'])));
   out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'agents'), 'agent', AGENT)));
   out.push(...(await scanMarkdownDir(ctx, path.join(claude, 'agents'), 'agent', ['.md'])));
-  for (const d of [path.join(gh, 'skills'), path.join(claude, 'skills'), path.join(root, '.agents', 'skills')]) out.push(...(await scanSkillsDir(ctx, d)));
+  // The same skill installed in two skill folders (npx skills add copies it to .claude and .agents) is one skill: the first folder wins.
+  out.push(...(await scanSkillFolders(ctx, [path.join(gh, 'skills'), path.join(claude, 'skills'), path.join(root, '.agents', 'skills')])));
   for (const f of await listJson(path.join(gh, 'hooks'))) out.push(...(await scanHookFile(ctx, f)));
   // A hook installed as a folder (awesome-copilot): .github/hooks/<name>/hooks.json next to its scripts, named after the folder.
   for (const dir of await subdirs(path.join(gh, 'hooks'))) {
@@ -172,8 +187,7 @@ export async function readHome(env: Env): Promise<CustomizationItem[]> {
     ...classifyRules(await scanMarkdownDir(ctx, path.join(claude, 'rules'), 'instruction', ['.md'])),
     ...(await scanMarkdownDir(ctx, path.join(claude, 'agents'), 'agent', ['.md'])),
     ...(await scanMcpFile(ctx, path.join(env.home, '.mcp.json'), 'mcpServers')),
-    ...(await scanSkillsDir(ctx, path.join(claude, 'skills'))),
-    ...(await scanSkillsDir(ctx, path.join(env.home, '.agents', 'skills'))),
+    ...(await scanSkillFolders(ctx, [path.join(claude, 'skills'), path.join(env.home, '.agents', 'skills')])),
     ...(await scanHookFile(ctx, path.join(claude, 'settings.json'), 'hooks')),
   ];
 }

@@ -30,7 +30,7 @@ const KIND_ICON: Record<Kind, string> = {
   plugin: 'extensions',
   subagent: 'organization',
   tool: 'tools',
-  agentic: 'workflow',
+  agentic: 'type-hierarchy',
   ci: 'play-circle',
   env: 'vm',
   governance: 'shield',
@@ -483,7 +483,7 @@ export function createNav(host: HTMLElement, overview: Overview): Nav {
       'Copilot',
       'Copilot\nWhat every Copilot session loads: instructions, prompt files, agents, skills, hooks, MCP servers and plugins from your user profile, ~/.copilot, your home folders and installed plugins.',
       [],
-      total(globalGroups)
+      q ? globalGroups.reduce((n, g) => n + g.items.filter((i) => itemMatches(g.kind, i, q)).length, 0) : total(globalGroups)
     );
     list.append(copilotHead);
     if (!copilotFolded) {

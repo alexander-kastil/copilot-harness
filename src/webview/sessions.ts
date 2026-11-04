@@ -92,7 +92,7 @@ export function sessionTable(list: SessionListRow[], label: string, host: HTMLEl
               'aria-label': 'Analyze this session',
               onclick: (e: Event) => {
                 e.stopPropagation();
-                askAi(host, 'Analyze this session', 'Opens a new Copilot CLI in a terminal and asks it to read this session. It counts against your Copilot credits.', () => startAi('analyze', s.id, prefs.model));
+                askAi(host, 'Analyze this session', 'Opens a new Copilot CLI in a terminal and asks it to read this session. It counts against your Copilot credits.', () => startAi('analyze', s.id, prefs.model), e.currentTarget as HTMLElement);
               },
               onkeydown: (e: Event) => e.stopPropagation(),
             },

@@ -139,7 +139,7 @@ export const backTarget = (): PageId => from;
 /** Opens a session's detail page from the overview, the nav or the Sessions page. */
 export function openSession(id: string): void {
   const page = currentPage();
-  if (page !== 'session') from = page === 'sessions' ? 'sessions' : 'overview';
+  if (page !== 'session') from = page === 'sessions' || page === 'element' ? page : 'overview';
   opener?.(id);
   post({ type: 'sessionOpen', id });
   showPage('session');
