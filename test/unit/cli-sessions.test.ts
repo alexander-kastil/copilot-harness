@@ -80,8 +80,9 @@ test('a second scan of unchanged sessions does not read events.jsonl', async () 
     const index = new ScanIndex<SessionSummary>();
     await readCliSessions(e, index);
     const opened: string[] = [];
-    const real = fs.createReadStream;
-    (fs as { createReadStream: unknown }).createReadStream = (p: unknown, ...rest: unknown[]) => {
+    const rawFs = require('node:fs') as { createReadStream: unknown };
+    const real = rawFs.createReadStream;
+    rawFs.createReadStream = (p: unknown, ...rest: unknown[]) => {
       opened.push(String(p));
       return (real as (...a: unknown[]) => unknown)(p, ...rest);
     };
@@ -90,7 +91,7 @@ test('a second scan of unchanged sessions does not read events.jsonl', async () 
       assert.equal(second.sessions.length, 2);
       assert.deepEqual(opened, []);
     } finally {
-      (fs as { createReadStream: unknown }).createReadStream = real;
+      rawFs.createReadStream = real;
     }
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });

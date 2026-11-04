@@ -9,3 +9,6 @@
 - Copilot Harness extension scaffold: webview panel with a typed message contract, vsce packaging, GitHub Actions CI, logo and a status bar item that opens the panel (#6).
 - Inventory of every Copilot customization kind across the workspace, the VS Code user profile, ~/.copilot and installed plugins (#7).
 - Readers for Copilot Chat debug logs and the OpenTelemetry trace database, opened read-only through node:sqlite (#9).
+- Reader for VS Code chat session files across every installed VS Code variant, with incremental rescans (#8).
+- Reader for Copilot CLI session state: workspace, repository, branch, models, tool, subagent and skill counts, and every usage snapshot kept raw (#10).
+- CLAUDE.md for this repo: all tests are allowed.
