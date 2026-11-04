@@ -124,7 +124,9 @@ async function readSession(
   const subagents = new Map<string, SubagentRun>();
   let sawEvents = false;
 
+  const hasEvents = await fs.promises.access(eventsFile).then(() => true, () => false);
   try {
+    if (!hasEvents) throw new Error('missing');
     const rl = readline.createInterface({ input: fs.createReadStream(eventsFile, { encoding: 'utf8' }), crlfDelay: Infinity });
     for await (const line of rl) {
       if (line.trim() === '') continue;
@@ -207,7 +209,7 @@ async function readSession(
       }
     }
   } catch {
-    skipped++;
+    if (hasEvents) skipped++;
   }
 
   const snapDir = path.join(dir, 'rewind-snapshots');

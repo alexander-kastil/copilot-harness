@@ -12,3 +12,8 @@
 - Reader for VS Code chat session files across every installed VS Code variant, with incremental rescans (#8).
 - Reader for Copilot CLI session state: workspace, repository, branch, models, tool, subagent and skill counts, and every usage snapshot kept raw (#10).
 - CLAUDE.md for this repo: all tests are allowed.
+
+### Fixed
+
+- Fix: CLI reader counts a missing events.jsonl as no events, not a skipped line (#10)
+

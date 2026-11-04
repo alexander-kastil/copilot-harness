@@ -24,6 +24,17 @@ export class HarnessPanel {
     HarnessPanel.current?.post(message);
   }
 
+  private static readonly listeners = new Set<(message: ToHost) => void>();
+
+  /**
+   * Features receive every webview message here, `ready` included (sent each time the page loads),
+   * so a feature answers `ready` by posting its current state.
+   */
+  static onMessage(listener: (message: ToHost) => void): vscode.Disposable {
+    HarnessPanel.listeners.add(listener);
+    return new vscode.Disposable(() => HarnessPanel.listeners.delete(listener));
+  }
+
   private constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly panel: vscode.WebviewPanel
@@ -39,6 +50,7 @@ export class HarnessPanel {
     if (message.type === 'ready') {
       this.post({ type: 'init', version: String(this.context.extension.packageJSON.version) });
     }
+    for (const listener of HarnessPanel.listeners) listener(message);
   }
 
   private post(message: ToWebview): void {

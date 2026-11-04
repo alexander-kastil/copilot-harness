@@ -5,8 +5,17 @@
 /** Host to webview. */
 export type ToWebview =
   | { type: 'init'; version: string }
-  | { type: 'theme'; kind: 'light' | 'dark' | 'highContrast' };
+  | { type: 'theme'; kind: 'light' | 'dark' | 'highContrast' }
+  | { type: 'setup'; state: import('./setup').SetupState }
+  | { type: 'setupResult'; key: string; ok: boolean; message: string }
+  | { type: 'credits'; state: import('./credits').CreditsState };
 
 /** Webview to host. */
 export type ToHost =
-  | { type: 'ready' };
+  | { type: 'ready' }
+  | { type: 'setupEnable'; key: string; scope: 'user' | 'workspace'; /** true after the second confirmation in the card; required for plain-text settings */ confirmed?: boolean }
+  | { type: 'setupDismiss' }
+  | { type: 'setupRecheck' }
+  | { type: 'creditsManualQuota'; used: number }
+  | { type: 'creditsClearManual' }
+  | { type: 'creditsReadGithub' };
