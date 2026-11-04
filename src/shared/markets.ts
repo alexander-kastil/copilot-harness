@@ -36,9 +36,7 @@ export interface MarketHealth {
 
 export type MarketOp =
   | { op: 'sync'; market: string; /** Absent: every plugin that is ahead. */ plugin?: string }
-  | { op: 'install' | 'uninstall' | 'enable' | 'disable'; market: string; plugin: string }
-  | { op: 'add'; source: string }
-  | { op: 'remove'; market: string }
+  | { op: 'uninstall' | 'enable' | 'disable'; market: string; plugin: string }
   | { op: 'rename'; market: string; to: string };
 
 export interface RenameFile {

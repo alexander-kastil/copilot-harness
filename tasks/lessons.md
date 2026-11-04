@@ -89,3 +89,17 @@
 **Pattern:** The first comparison `cat` both repos' `package.json`; this repo's BYOK settings schema alone is several hundred lines, so the call passed the agentic-orchestration guard's 20,000 characters and the next lookup was refused.
 **Rule:** Compare manifests by the fields needed (`node -p "const p=require('./package.json');({version:p.version,publisher:p.publisher,repository:p.repository,homepage:p.homepage,bugs:p.bugs,scripts:p.scripts})"`), never the whole file; a wider comparison goes to the specialist or a fact gatherer.
 **Replaces:** none
+
+## Solution: the window rule held only once a guard enforced it
+
+**Problem:** The owner asked six times in one evening for test windows at 1280 px, never full screen and without the Explorer ("enforce it!!!!"); briefs, repo `CLAUDE.md` rules and mid-run messages did not stop agents' windows opening at 2560 px with the Explorer.
+**Solution:** A background guard on the main thread, harvested as the vscode-extension skill's `scripts/window-guard.mjs` (with `window-size.ps1`): every 2 seconds it restores and resizes each isolated window under `claude-scratch` to 1280 x 800 through Win32 and presses Ctrl+B only while the side bar shows the Explorer. VS Code's DevTools endpoint has no `Browser.getWindowForTarget`, closing any side bar broke the Source Control shot, and resizing the UI suite's windows would break its size tests, so it skips `uiroot`.
+**Evidence:** Its log corrected windows at 2560, 1500, 1455, 971, 864 and 853 px and closed the Explorer several times; no window complaint followed after it started at 19:56.
+**Reuse:** Start it at the beginning of every run that opens isolated VS Code windows; deterministic, scripted.
+**Replaces:** none
+
+## Hung agent calls with no process behind them
+
+**Pattern:** Three times an agent's Bash call (an `npm test` to a log, a launch with `sleep 20` and `place-window.ps1`, a `Read` of an image) stayed pending 6 to 22 minutes with no process running and no output file growing.
+**Rule:** When the probe shows a pending call and a process check finds nothing behind it, `TaskStop` the agent and `SendMessage` it to resume with what it was doing and to run launches in the background or under a timeout; never wait for a second tick.
+**Replaces:** none

@@ -55,18 +55,11 @@ function stepsOf(op: MarketOp, markets: MarketHealth[]): Step[] | string {
       const targets = op.plugin ? [op.plugin] : (market?.plugins ?? []).filter((p) => p.ahead).map((p) => p.name);
       return [{ title: `Refresh ${op.market}`, args: ['plugin', 'marketplace', 'update', op.market] }, ...targets.map((p) => ({ title: `Update ${p}`, args: ['plugin', 'update', `${p}@${op.market}`] }))];
     }
-    case 'install':
     case 'uninstall':
-      return [{ title: `${op.op === 'install' ? 'Install' : 'Uninstall'} ${op.plugin}`, args: ['plugin', op.op, `${op.plugin}@${op.market}`] }];
+      return [{ title: `Uninstall ${op.plugin}`, args: ['plugin', 'uninstall', `${op.plugin}@${op.market}`] }];
     case 'enable':
     case 'disable':
       return [{ title: `${op.op === 'enable' ? 'Enable' : 'Disable'} ${op.plugin}`, args: ['plugin', op.op, `${op.plugin}@${op.market}`] }];
-    case 'add':
-      if (!op.source.trim() || UNSAFE.test(op.source)) return 'That source holds a character that cannot be passed to Copilot CLI safely.';
-      return [{ title: `Add ${op.source}`, args: ['plugin', 'marketplace', 'add', op.source.trim()] }];
-    case 'remove':
-      // A marketplace with installed plugins is only removed with --force, which uninstalls them: the page's card says so.
-      return [{ title: `Remove ${op.market}`, args: ['plugin', 'marketplace', 'remove', op.market, ...(market?.plugins.some((p) => p.installed && !p.live) ? ['--force'] : [])] }];
     default:
       return 'Unknown action.';
   }

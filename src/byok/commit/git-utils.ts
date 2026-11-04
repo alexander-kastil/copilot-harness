@@ -175,7 +175,40 @@ export async function getWorkingState(cwd: string): Promise<string> {
   }
 }
 
-export async function getGitDiff(cwd: string, stagedOnly = false): Promise<string> {
+export interface BranchContext {
+  branch: string;
+  base: string;
+  commits: string[];
+  diff: string;
+}
+
+/** The commits and the diff of the current branch against its base (the setting, origin's default branch, main or master). */
+export async function getBranchContext(cwd: string, configuredBase = ''): Promise<BranchContext> {
+  const git = async (cmd: string): Promise<string> => (await execAsync(`git --no-pager ${cmd}`, { cwd, maxBuffer: 64 * 1024 * 1024 })).stdout.trim();
+  if (!(await checkGitRepo(cwd))) throw new Error('Not a git repository');
+  const branch = await git('rev-parse --abbrev-ref HEAD');
+  let base = configuredBase.trim();
+  if (!base) {
+    const head = await git('symbolic-ref --short refs/remotes/origin/HEAD').catch(() => '');
+    const candidates = [head, 'origin/main', 'origin/master', 'main', 'master'].filter(Boolean);
+    for (const c of candidates) {
+      if (c === branch) continue;
+      if (await git(`rev-parse --verify --quiet ${c}`).catch(() => '')) {
+        base = c;
+        break;
+      }
+    }
+  }
+  if (!base) throw new Error('No base branch found. Set Pull request base branch in the Copilot Harness settings.');
+  const range = `${base}..HEAD`;
+  const log = await git(`log ${range} --reverse --format=%s%n%b%x1e`);
+  const commits = log.split('\x1e').map((c) => c.trim()).filter(Boolean);
+  if (!commits.length) throw new Error(`Branch ${branch} has no commits ahead of ${base}.`);
+  const diff = await git(`diff ${base}...HEAD --diff-filter=d`);
+  return { branch, base, commits, diff };
+}
+
+export async function getGitDiff(cwd: string, stagedOnly = false, lineLimit = GIT_OUTPUT_LINE_LIMIT): Promise<string> {
   try {
     const isInstalled = await checkGitInstalled();
     if (!isInstalled) {
@@ -204,7 +237,7 @@ export async function getGitDiff(cwd: string, stagedOnly = false): Promise<strin
       throw new Error('No changes in workspace for commit message');
     }
 
-    return truncateOutput(`'${command}' Output:\n\n${diff}`.trim());
+    return lineLimit ? truncateOutput(`'${command}' Output:\n\n${diff}`.trim()) : diff;
   } catch (error) {
     throw error;
   }

@@ -5,9 +5,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { CustomizationItem } from '../shared/customizations';
-import { copilotHome, type Env } from './paths';
-import { readMarkets } from './markets';
-import {
+import { copilotHome, type Env } from './paths';import {
   isDir,
   makeItem,
   readJson,
@@ -120,13 +118,6 @@ export async function readInstalledPlugins(env: Env): Promise<CustomizationItem[
       const id = `${plugin}@${marketplace}`;
       const fromSettings = enabledMap[id];
       out.push(...(await scanPluginDir('plugin', dir, id, plugin, fromSettings !== false, marketplace)));
-    }
-  }
-
-  // A plugin from a local folder marketplace is loaded live from that folder and never copied, so neither list above has it.
-  for (const market of readMarkets(env)) {
-    for (const p of market.plugins) {
-      if (p.live && p.dir) out.push(...(await scanPluginDir('plugin', p.dir, p.key, p.name, p.enabled, market.name)));
     }
   }
   return out;

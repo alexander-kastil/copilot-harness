@@ -36,10 +36,9 @@ Copilot Harness reads all of it read-only and shows it in one place. Nothing joi
 | [Sessions from every source](#sessions-from-every-source) | Chat sessions, debug logs, the trace database and Copilot CLI sessions in one list, with turns, models, tokens and credits |
 | [Repositories](#repositories) | Each repository's customizations by kind, its sessions and credits of the last 7 days, and its last session |
 | [Credits](#credits) | Reconciles the credits your local data explains against the quota GitHub reports, and shows what is left unexplained |
-| [Setup check](#setup-check) | Shows which session sources are on, and switches on the opt-in ones from the card |
-| [Snapshot store](#snapshot-store) | Keeps the numbers of every session it has seen, so sessions stay listed after Copilot deletes their files |
 | [BYOK models in Copilot Chat](#byok-models-in-copilot-chat) | Your own providers and models in the Copilot Chat model picker, with five API modes and keys in VS Code's secret storage |
 | [PAYG models page](#payg-models-page) | Everything Manage BYOK Models does, as a page: providers, models, keys, import and export |
+| [Plugin Hunter](#plugin-hunter) | Copilot proposes a plugin from the skills and agents you already have and creates it in a marketplace you own |
 | [Commit messages and token meter](#commit-messages-and-token-meter) | Writes the commit message with a BYOK model, and shows the current model's context use in the status bar |
 
 ## Overview
@@ -95,18 +94,6 @@ The **Repositories** tab and region list every repository with the number of cus
 
 The Credits card sets the credit figures from your local session data, per source, against the quota used. The quota is read from GitHub with your signed-in GitHub session when you press the button, and no token is stored; you can also type it in. Every figure names its source, and the remainder no local data explains is shown on its own.
 
-## Setup check
-
-![The Session data sources card with the status of chat sessions, debug logs, the trace database and Copilot CLI data](docs/images/setup.png)
-
-The **Session data sources** card shows the status of chat sessions, debug logs, the trace database and Copilot CLI data. Three sources are opt-in, and the card switches them on in your user settings: the agent debug log, its file logging and the OpenTelemetry database exporter. The card warns that these store plain text and need a window reload.
-
-## Snapshot store
-
-![The Snapshots card showing how many sessions are kept as numbers only and the store size](docs/images/snapshots.png)
-
-Every Copilot session the extension sees is kept as numbers only in the extension's own storage, so sessions stay listed after Copilot deletes their files. The store is capped at 50 MB by default (`copilotHarness.snapshots.maxMegabytes`), and the oldest sessions go first.
-
 ## BYOK models in Copilot Chat
 
 ![The Manage BYOK Models menu listing providers with their API modes and the models of each](docs/images/byok.png)
@@ -127,11 +114,19 @@ Run **Manage BYOK Models** from the Command Palette for the menu.
 
 The **PAYG models** tile opens a page with every BYOK provider (base URL, API mode, header names, model count and whether a key is set, never its value) and every model. Everything the Manage BYOK Models menu does is a control on the page, with a confirm card before each change: add, edit and remove providers, set or remove keys (typed into VS Code's password box), fetch a provider's models and add them, edit model fields and the global settings, import from OAI Compatible or a file, and export.
 
+## Plugin Hunter
+
+![Plugin Hunter with a chat that asks for a team plugin, and the proposal: a writing-helpers plugin with two skills and one agent, ready to create in a local marketplace](docs/images/plugin-hunter.png)
+
+**Plugin Hunter**, in the AI group of the Overview tab bar, has Copilot propose a plugin from the skills and agents you already have and creates it in a marketplace you own. Pick a local marketplace (a folder registered with `copilot plugin marketplace add` that holds a `marketplace.json`), say what the plugin should do, and Copilot answers with proposal cards listing the skills and agents it would bundle, each marked when your copy differs from its source. Replace and Add refine the proposal, and **Create** writes the plugin in Copilot's format (`.github/plugin/plugin.json`, `skills/`, `agents/`), adds it to the marketplace's `marketplace.json` and installs it with Copilot CLI. Each hunt runs Copilot CLI in the background, asks once per conversation before it starts, and counts against your Copilot credits; past hunts stay in the **History** tab.
+
 ## Commit messages and token meter
 
 ![The Source Control view with the generate commit message button, and the token meter in the status bar](docs/images/commit.png)
 
-- **Commit messages:** **Generate Commit Message with BYOK Model**, the wand in the Source Control title bar, writes the message with a model you marked for commit generation, in one of 14 languages and with your own prompt if you set one. A progress notification has **Stop**.
+- **Commit messages:** **Generate Commit Message with BYOK Model**, the wand in the Source Control title bar, writes the message with a model you marked for commit generation, in one of 14 languages and with your own prompt if you set one. It reads up to 24,000 characters of the staged diff, cut at a file boundary with the omitted files listed, and can write Gitmoji or plain messages. A progress notification has **Stop**.
+- **Pull request messages:** **Generate Pull Request Message with BYOK Model**, in the Source Control title bar and the command palette, writes a title and description from the branch's commits and its diff against the base branch, with the same model. The result opens as a Markdown document and is copied to the clipboard; its prompt and base branch are settings on the Providers page.
+- **Moving from AI Commit:** the first time Copilot Harness runs, it takes over your AI Commit (`ai-commit.*`) settings once: the provider, model, temperature, language and system prompt, with the API key moved into VS Code's secret storage. A notification names what moved, and your `ai-commit.*` settings stay as they are.
 - **Token meter:** a status bar item shows how much of the current BYOK model's context the conversation uses, turns to a warning at 70% and an error at 90%, and opens Manage BYOK Models on click.
 
 ## License

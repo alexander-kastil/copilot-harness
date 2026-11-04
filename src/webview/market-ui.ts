@@ -126,10 +126,6 @@ export function syncAll(anchor: HTMLElement, m: MarketHealth): void {
   );
 }
 
-export function installPlugin(anchor: HTMLElement, m: MarketHealth, p: MarketPlugin): void {
-  ask(anchor, { title: `Install ${p.name}`, text: `Runs copilot plugin install ${p.key}${p.source ? ` (version ${p.source})` : ''}. It changes your Copilot plugins.`, label: 'Install', glyph: 'cloud-download' }, () => runOp({ op: 'install', market: m.name, plugin: p.name }));
-}
-
 export function uninstallPlugin(anchor: HTMLElement, m: MarketHealth, p: MarketPlugin): void {
   ask(anchor, { title: `Uninstall ${p.name}`, text: `Runs copilot plugin uninstall ${p.key}. Its skills, agents and hooks stop loading in Copilot.`, label: 'Uninstall', glyph: 'trash', danger: true }, () => runOp({ op: 'uninstall', market: m.name, plugin: p.name }));
 }
@@ -137,35 +133,6 @@ export function uninstallPlugin(anchor: HTMLElement, m: MarketHealth, p: MarketP
 export function togglePlugin(anchor: HTMLElement, m: MarketHealth, p: MarketPlugin): void {
   const on = !p.enabled;
   ask(anchor, { title: `${on ? 'Enable' : 'Disable'} ${p.name}`, text: `Runs copilot plugin ${on ? 'enable' : 'disable'} ${p.key}, which sets ${p.key} under enabledPlugins in ~/.copilot/settings.json.`, label: on ? 'Enable' : 'Disable', glyph: on ? 'pass' : 'circle-slash' }, () => runOp({ op: on ? 'enable' : 'disable', market: m.name, plugin: p.name }));
-}
-
-export function addMarket(anchor: HTMLElement): void {
-  ask(
-    anchor,
-    {
-      title: 'Add a marketplace',
-      text: 'Runs copilot plugin marketplace add with a GitHub repository (owner/repo), a git URL or a folder on this PC. The name comes from its marketplace.json.',
-      label: 'Add marketplace',
-      glyph: 'add',
-      input: { label: 'Source', placeholder: 'owner/repo, a git URL or a folder', check: (v) => (/["`$%&|<>^]/.test(v) ? 'This source holds a character that cannot be passed on safely.' : undefined) },
-    },
-    (source) => runOp({ op: 'add', source })
-  );
-}
-
-export function removeMarket(anchor: HTMLElement, m: MarketHealth): void {
-  const installed = m.plugins.filter((p) => p.installed && !p.live).length;
-  ask(
-    anchor,
-    {
-      title: `Remove ${m.name}`,
-      text: `Runs copilot plugin marketplace remove ${m.name}${installed ? ` --force, which also uninstalls its ${plural(installed, 'installed plugin')}` : ''}. ${m.kind === 'directory' ? 'The folder stays on disk.' : ''}`.trim(),
-      label: 'Remove',
-      glyph: 'trash',
-      danger: true,
-    },
-    () => runOp({ op: 'remove', market: m.name })
-  );
 }
 
 export function renameMarket(anchor: HTMLElement, m: MarketHealth, all: MarketHealth[]): void {

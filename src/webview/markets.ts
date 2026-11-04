@@ -6,7 +6,7 @@ import { cmd, cmdBar, cmdBox } from './cmd-bar';
 import { el, icon, plural } from './dom';
 import { showElement } from './element-page';
 import { entryOf } from './harness-data';
-import { addMarket, installPlugin, removeMarket, renameMarket, syncAll, syncPlugin } from './market-ui';
+import { renameMarket, syncAll, syncPlugin } from './market-ui';
 import { aheadOf, clearNotice, getMarkets, getNotice, isBusy, marketOf, onMarkets, reload } from './market-data';
 import { showPage } from './pages';
 import { gridTable, type Column } from './tables';
@@ -60,7 +60,7 @@ function syncCols(m: MarketHealth): Column<MarketPlugin>[] {
           ? el('button', { type: 'button', className: 'payg-btn secondary', title: `Sync plugin\nRefresh ${m.name} and update ${p.name} from ${p.installed} to ${p.source}.`, onclick: (e: MouseEvent) => (e.stopPropagation(), syncPlugin(e.currentTarget as HTMLElement, m, p)) }, icon('sync'), 'Sync plugin')
           : p.installed
             ? stateTag('current', 'ok')
-            : [stateTag('uninstalled', 'none'), el('button', { type: 'button', className: 'icon-btn', title: `Install\nRuns copilot plugin install ${p.key}.`, 'aria-label': `Install ${p.name}`, onclick: (e: MouseEvent) => (e.stopPropagation(), installPlugin(e.currentTarget as HTMLElement, m, p)) }, icon('cloud-download'))],
+            : stateTag('uninstalled', 'none'),
       title: (p) => (p.ahead ? undefined : `Sync · ${p.installed ? 'Up to date' : 'Not installed'}\n${p.installed ? 'The installed copy matches the source.' : 'The plugin is not installed.'}${p.enabled ? '\nEnabled' : ''}`),
     },
   ];
@@ -179,8 +179,7 @@ export function createMarketPages(): MarketPages {
                 draw();
               })
             : null
-        ),
-        cmdBox('Marketplaces', cmd('add', 'Add marketplace...', 'Add marketplace\nRegisters a GitHub repository, a git URL or a folder with copilot plugin marketplace add. It asks first.', (e) => addMarket(e.currentTarget as HTMLElement)))
+        )
       ),
       body
     );
@@ -237,8 +236,7 @@ export function createMarketPages(): MarketPages {
           ? cmdBox(
               'Marketplace',
               m.kind === 'directory' ? cmd('edit', 'Rename marketplace...', 'Rename marketplace\nRenames a directory marketplace and re-registers its plugins. A github marketplace takes its name from its marketplace.json, so rename it at its source.', (e) => renameMarket(e.currentTarget as HTMLElement, m, list ?? [])) : null,
-              ahead ? cmd('sync', `Sync ${plural(ahead, 'plugin')}`, `Sync ${plural(ahead, 'plugin')}\nRefresh ${m.name} once, then update every plugin whose source is ahead of the installed copy.`, (e) => syncAll(e.currentTarget as HTMLElement, m)) : null,
-              m.builtin ? null : cmd('trash', 'Remove marketplace...', `Remove marketplace\nUnregisters ${m.name} with copilot plugin marketplace remove.`, (e) => removeMarket(e.currentTarget as HTMLElement, m))
+              ahead ? cmd('sync', `Sync ${plural(ahead, 'plugin')}`, `Sync ${plural(ahead, 'plugin')}\nRefresh ${m.name} once, then update every plugin whose source is ahead of the installed copy.`, (e) => syncAll(e.currentTarget as HTMLElement, m)) : null
             )
           : null
       ),

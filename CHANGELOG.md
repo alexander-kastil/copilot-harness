@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 ### Added
 
 - Research on whether a VS Code extension like Claude Harness exists for GitHub Copilot, and a Copilot harness for this repo based on the Agentic Software Engineering class.
@@ -27,22 +29,18 @@
 - Skills in two kinds: Deterministic (the folder has a scripts/ file and SKILL.md names a path under scripts/) and Orchestration (every other skill).
 - Hooks installed as .github/hooks/<name>/hooks.json are read, and an *.instructions.md whose applyTo matches every file counts as General instead of Stack-specific.
 - PAYG models tile in the overview's kind tiles and a PAYG models page: the BYOK providers, models and global settings with whether an API key is set (never its value), and everything the Manage BYOK Models menu does as page controls and confirm cards, keys typed in VS Code's password box.
-- Port OAI Compatible into harness with menus: The Overview line is intact, and my "(#38)" line sits directly under it
-- PAYG models tile and page: The PAYG models tile and page work in an isolated real VS Code (port 9334)
-- README.md in the root like Claude Harness's: quick start, why, the top 10 features including BYOK, one section per feature, no screenshots.
+- README.md in the root like Claude Harness's: quick start, why, the main features, one section per feature, each with a 1280 px screenshot from made-up data.
 - Sessions page and session detail page like Claude Harness's: a session search with filter chips, a detail page with credits, tokens, subagent diagrams and subagent card, rows in the overview and the nav open it, and Analyze and Continue session start Copilot CLI in a terminal with a model picker.
 - Billing switch in the session cost card like Claude Harness's: the session's credits as a share of a Copilot plan's monthly allowance (Pro, Pro+, Business, Enterprise) or as dollars on pay as you go, remembered in the panel and started on the plan GitHub's quota reading points to.
 - Free option on the Billing switch: shows the session in AI credits, because GitHub publishes no AI-credit allowance for Copilot Free.
-- Release build
-- Make extension Marketplace-publishable: Progress: 5/5 · report
-- Split Providers and Models pages: The Models and Providers pages are split, and the Overview has a "Providers" tile beside "PAYG models"
-- Sessions pages and AI features: I built the Sessions page and the session detail page
-- Drop CLAUDE.md, add six tiles: Copilot Memory now shows as its own kind, "Copilot Memory", in the nav (global and per repository), the
-- Claude Harness UI style and AI actions: The element page now opens a Copilot Memory item's url in the browser and no longer opens or
-- Drop CLAUDE.md, add six tiles: Skills are now split into two kinds, and both show in the Overview tiles, the nav (global and per
+- Release build: azure-pipelines.yml packages the VSIX on every run and publishes it to the Visual Studio Marketplace from the deploy branch.
+- Marketplace-ready package: author, homepage and issue links in package.json, and a .vscodeignore that keeps session files, tasks and the pipeline out of the VSIX.
 - Plugin Hunter like Claude Harness's: a button in the Overview tab bar opens a page where Copilot CLI proposes a plugin from your skills and agents in a chat, you edit the card, and Create writes it into a marketplace folder of yours in the Copilot plugin format and installs it with `copilot plugin install`.
-- README feature screenshots: All 11 images are in and linked once each in README.md: the hero under # Copilot Harnes
-- Marketplace support like Claude Harness: a Marketplaces section in the nav, Marketplace health and a page per marketplace read from Copilot CLI and VS Code, Sync plugin and Sync all, rename a local marketplace, add and remove a marketplace, and enable, disable, install and uninstall a plugin, each behind a confirm card.
+- Marketplace support like Claude Harness: a Marketplaces section in the nav, Marketplace health and a page per marketplace read from Copilot CLI and VS Code, Sync plugin and Sync all, rename a local marketplace, and enable, disable and uninstall a plugin, each behind a confirm card.
+- Command bar on the pages, ported from Claude Harness: every command sits in a labelled box (Page, File, Model and so on), and the AI commands sit at the right end of the bar.
+- Commit messages: the built-in prompt follows AI Commit's guide with an optional gitmoji setting, and a diff is cut at a file boundary at 24000 characters instead of 5000.
+- Pull request messages: "Generate Pull Request Message with BYOK Model" writes a title and description from the commits and diff of the branch against its base, from the Source Control title bar and the command palette, with a prompt and a base branch setting beside the commit message settings.
+- Migration of the AI Commit settings: once, the ai-commit.* provider, model, temperature, language and system prompt become a BYOK provider and model selected for commit messages, and the API key moves into SecretStorage.
 
 ### Changed
 
@@ -54,5 +52,4 @@
 
 - CLI reader counts a missing events.jsonl as no events, not a skipped line (#10).
 - The VSIX ships its yaml and jsonc-parser runtime dependencies.
-- Claude Harness UI style and AI actions: A skill's element page now has a "Used in" tab, and the isolated VS Code check shows the fixture
 

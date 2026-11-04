@@ -398,6 +398,9 @@ export const GLOBAL_FIELDS = [
   'retry.status_codes',
   'commitLanguage',
   'commitMessagePrompt',
+  'commitGitmoji',
+  'prMessagePrompt',
+  'prBaseBranch',
   'logLevel',
 ] as const;
 export type GlobalField = (typeof GLOBAL_FIELDS)[number];
@@ -436,7 +439,12 @@ export function parseGlobalText(field: GlobalField, text: string): GlobalParse {
     case 'logLevel':
       return LOG_LEVELS.includes(t) ? { ok: true, value: t } : { ok: false, error: 'Pick one of the listed levels.' };
     case 'commitMessagePrompt':
+    case 'prMessagePrompt':
       return { ok: true, value: text };
+    case 'commitGitmoji':
+      return t === 'true' || t === 'false' ? { ok: true, value: t === 'true' } : { ok: false, error: 'Enter true or false.' };
+    case 'prBaseBranch':
+      return /^\S*$/.test(t) ? { ok: true, value: t } : { ok: false, error: 'A branch name has no spaces.' };
   }
 }
 

@@ -21,7 +21,7 @@ const claude: HFModelItem = { id: 'claude-x', configId: 'think', owned_by: 'anth
 const input = (over: Partial<PaygInput> = {}): PaygInput => ({
   models: [row, chat, claude],
   baseUrl: 'https://global.example.com',
-  settings: { delay: 5, readFileLines: 0, retry: { enabled: false }, commitLanguage: 'German', commitMessagePrompt: '', logLevel: 'info' },
+  settings: { delay: 5, readFileLines: 0, retry: { enabled: false }, commitLanguage: 'German', commitMessagePrompt: '', commitGitmoji: false, prMessagePrompt: '', prBaseBranch: '', logLevel: 'info' },
   providerKeys: ['deepseek'],
   genericKey: false,
   ...over,

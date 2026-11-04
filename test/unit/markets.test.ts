@@ -3,7 +3,6 @@ import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { catalogFile, compareVersions, planRename, readMarkets, renameCatalog, renameInSettings } from '../../src/readers/markets';
-import { readInstalledPlugins } from '../../src/readers/customization-plugins';
 import type { Env } from '../../src/readers/paths';
 
 // out/test/unit -> repo root. Everything is built under out/test-tmp/markets: a Copilot home with a local marketplace of two
@@ -88,13 +87,6 @@ test('VS Code marketplaces join the list, and one both tools know shows both', (
 test('catalogFile finds the first catalog in Copilot CLI order', () => {
   assert.equal(catalogFile(mk), path.join(mk, '.claude-plugin', 'marketplace.json'));
   assert.equal(catalogFile(path.join(work, 'nowhere')), undefined);
-});
-
-test('the Plugins kind lists a live plugin too', async () => {
-  const items = await readInstalledPlugins(env);
-  const beta = items.filter((i) => i.pluginId === 'beta@scratch-market');
-  assert.ok(beta.some((i) => i.kind === 'plugin'));
-  assert.ok(beta.some((i) => i.kind === 'skill' && i.name === 'yo'));
 });
 
 test('renameInSettings moves the marketplace entry and its plugin keys, keeping the comment line', () => {

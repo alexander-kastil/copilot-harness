@@ -34,7 +34,7 @@ const emptyState = (): PaygState => ({
   models: 0,
   providers: [],
   items: [],
-  global: { genericKey: false, values: { baseUrl: '', delay: '0', readFileLines: '0', 'retry.enabled': 'true', 'retry.max_attempts': '3', 'retry.interval_ms': '1000', 'retry.status_codes': '', commitLanguage: 'English', commitMessagePrompt: '', logLevel: 'off' } },
+  global: { genericKey: false, values: { baseUrl: '', delay: '0', readFileLines: '0', 'retry.enabled': 'true', 'retry.max_attempts': '3', 'retry.interval_ms': '1000', 'retry.status_codes': '', commitLanguage: 'English', commitMessagePrompt: '', commitGitmoji: 'false', prMessagePrompt: '', prBaseBranch: '', logLevel: 'off' } },
 });
 
 const GLOBAL_LABEL: Record<GlobalField, string> = {
@@ -47,6 +47,9 @@ const GLOBAL_LABEL: Record<GlobalField, string> = {
   'retry.status_codes': 'Retry extra status codes',
   commitLanguage: 'Commit message language',
   commitMessagePrompt: 'Commit message prompt',
+  commitGitmoji: 'Gitmoji in commit messages',
+  prMessagePrompt: 'Pull request message prompt',
+  prBaseBranch: 'Pull request base branch',
   logLevel: 'Log level',
 };
 
@@ -142,10 +145,13 @@ export function createPaygPage(kind: 'models' | 'providers'): PaygPage {
       if (f === 'commitLanguage') return field(GLOBAL_LABEL[f], select(LANGUAGES, value, set));
       if (f === 'logLevel') return field(GLOBAL_LABEL[f], select(LOG_LEVELS, value, set));
       if (f === 'commitMessagePrompt') return field(GLOBAL_LABEL[f], areaInput(value, set, '', 3), 'System prompt for commit messages. Empty uses the default.');
+      if (f === 'commitGitmoji') return field(GLOBAL_LABEL[f], select(['true', 'false'], value, set), 'Starts each generated commit message with a gitmoji for its type.');
+      if (f === 'prMessagePrompt') return field(GLOBAL_LABEL[f], areaInput(value, set, '', 3), 'System prompt for pull request titles and descriptions. Empty uses the default.');
+      if (f === 'prBaseBranch') return field(GLOBAL_LABEL[f], textInput(value, set, 'main'), 'Branch the pull request message is written against. Empty finds the default branch.');
       if (f === 'retry.status_codes') return field(GLOBAL_LABEL[f], textInput(value, set, '408, 409'), 'Comma separated three digit codes');
       return field(GLOBAL_LABEL[f], textInput(value, set));
     };
-    const fields: GlobalField[] = ['baseUrl', 'delay', 'readFileLines', 'retry.enabled', 'retry.max_attempts', 'retry.interval_ms', 'retry.status_codes', 'commitLanguage', 'logLevel', 'commitMessagePrompt'];
+    const fields: GlobalField[] = ['baseUrl', 'delay', 'readFileLines', 'retry.enabled', 'retry.max_attempts', 'retry.interval_ms', 'retry.status_codes', 'commitLanguage', 'logLevel', 'commitMessagePrompt', 'commitGitmoji', 'prMessagePrompt', 'prBaseBranch'];
     const changed = () => Object.fromEntries(fields.filter((f) => (draft[f] ?? '') !== (state.global.values[f] ?? '')).map((f) => [f, draft[f] ?? '']));
     return section(
       'Global settings',

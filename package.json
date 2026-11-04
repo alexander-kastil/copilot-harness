@@ -2,7 +2,7 @@
   "name": "copilot-harness",
   "displayName": "Copilot Harness",
   "description": "Harness engineering for GitHub Copilot: see how your agents, skills, instructions and prompts work together across sessions and repositories.",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "publisher": "integrations-at",
   "license": "SEE LICENSE IN LICENSE",
   "icon": "media/icon.png",
@@ -64,6 +64,12 @@
         "title": "Generate Commit Message with BYOK Model - Stop",
         "category": "Copilot Harness",
         "icon": "$(debug-stop)"
+      },
+      {
+        "command": "copilotHarness.byok.generateGitPrMessage",
+        "title": "Generate Pull Request Message with BYOK Model",
+        "category": "Copilot Harness",
+        "icon": "$(git-pull-request-create)"
       }
     ],
     "configuration": {
@@ -418,6 +424,21 @@
           "default": "",
           "description": "Custom system prompt for commit message generation. If not provided, uses the default prompt."
         },
+        "copilotHarness.byok.commitGitmoji": {
+          "type": "boolean",
+          "default": false,
+          "description": "Start each generated Git commit message with a gitmoji for its type. Ignored when a custom commit message prompt is set."
+        },
+        "copilotHarness.byok.prMessagePrompt": {
+          "type": "string",
+          "default": "",
+          "description": "Custom system prompt for pull request title and description generation. If not provided, uses the default prompt."
+        },
+        "copilotHarness.byok.prBaseBranch": {
+          "type": "string",
+          "default": "",
+          "description": "Branch a generated pull request message is written against. Empty uses the default branch of origin."
+        },
         "copilotHarness.byok.readFileLines": {
           "type": "number",
           "default": 0,
@@ -430,6 +451,11 @@
     "menus": {
       "scm/title": [
         {
+          "command": "copilotHarness.byok.generateGitPrMessage",
+          "group": "navigation",
+          "when": "config.git.enabled && scmProvider == git"
+        },
+        {
           "command": "copilotHarness.byok.generateGitCommitMessage",
           "group": "navigation",
           "when": "config.git.enabled && scmProvider == git && !copilotHarness.byok.isGeneratingCommit"
@@ -441,6 +467,10 @@
         }
       ],
       "commandPalette": [
+        {
+          "command": "copilotHarness.byok.generateGitPrMessage",
+          "when": "config.git.enabled"
+        },
         {
           "command": "copilotHarness.byok.generateGitCommitMessage",
           "when": "config.git.enabled && !copilotHarness.byok.isGeneratingCommit"

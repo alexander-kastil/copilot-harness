@@ -83,6 +83,9 @@ export interface PaygSettings {
   retry: RetryConfig;
   commitLanguage: string;
   commitMessagePrompt: string;
+  commitGitmoji: boolean;
+  prMessagePrompt: string;
+  prBaseBranch: string;
   logLevel: string;
 }
 
@@ -151,6 +154,9 @@ export function buildPaygState(input: PaygInput): PaygState {
         'retry.status_codes': (retry.status_codes ?? []).join(', '),
         commitLanguage: input.settings.commitLanguage,
         commitMessagePrompt: input.settings.commitMessagePrompt,
+        commitGitmoji: String(input.settings.commitGitmoji),
+        prMessagePrompt: input.settings.prMessagePrompt,
+        prBaseBranch: input.settings.prBaseBranch,
         logLevel: input.settings.logLevel,
       },
     },
