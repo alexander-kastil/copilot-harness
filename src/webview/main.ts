@@ -1,12 +1,10 @@
 import { cards } from './cards';
 import { onMessage, post } from './bridge';
+import { createOverview } from './overview';
 
 const root = document.getElementById('app')!;
-const h1 = document.createElement('h1');
-h1.textContent = 'Copilot Harness';
 const grid = document.createElement('div');
 grid.className = 'cards';
-root.append(h1, grid);
 
 for (const card of cards) {
   const el = document.createElement('section');
@@ -20,7 +18,12 @@ for (const card of cards) {
   card.render(body);
 }
 
+// The overview page owns the layout; the registered cards render below its lists.
+const overview = createOverview(grid);
+root.append(overview.root);
+
 onMessage(message => {
+  if (message.type === 'overview') overview.update(message.state);
   for (const card of cards) card.onMessage?.(message);
 });
 

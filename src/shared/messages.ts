@@ -9,7 +9,8 @@ export type ToWebview =
   | { type: 'setup'; state: import('./setup').SetupState }
   | { type: 'setupResult'; key: string; ok: boolean; message: string }
   | { type: 'credits'; state: import('./credits').CreditsState }
-  | { type: 'snapshots'; state: import('./snapshots').SnapshotsState };
+  | { type: 'snapshots'; state: import('./snapshots').SnapshotsState }
+  | { type: 'overview'; state: import('./overview').OverviewState };
 
 /** Webview to host. */
 export type ToHost =
