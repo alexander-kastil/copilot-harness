@@ -1,0 +1,13 @@
+{"type":"session.start","data":{"sessionId":"s1","startTime":"2026-09-20T10:00:00.000Z","selectedModel":"gpt-5-mini"},"id":"e1","timestamp":"2026-09-20T10:00:00.000Z","parentId":null}
+{"type":"user.message","data":{"content":"SENTINEL_PROMPT"},"id":"e2","timestamp":"2026-09-20T10:00:01.000Z","parentId":"e1"}
+{"type":"assistant.turn_start","data":{"turnId":"0","model":"claude-haiku-4.5"},"id":"e3","timestamp":"2026-09-20T10:00:02.000Z","parentId":"e2"}
+{"type":"tool.execution_start","data":{"toolCallId":"t1","toolName":"bash","arguments":{"command":"SENTINEL_TOOL"}},"id":"e4","timestamp":"2026-09-20T10:00:03.000Z","parentId":"e3"}
+{"type":"subagent.started","data":{"toolCallId":"t2","agentName":"explore","model":"gpt-5-mini"},"id":"e5","timestamp":"2026-09-20T10:00:04.000Z","parentId":"e3"}
+{"type":"subagent.completed","data":{"toolCallId":"t2","agentName":"explore","model":"gpt-5-mini","totalToolCalls":3,"totalTokens":900},"id":"e6","timestamp":"2026-09-20T10:00:05.000Z","parentId":"e5"}
+{"type":"skill.invoked","data":{"name":"s","content":"SENTINEL_SKILL"},"id":"e7","timestamp":"2026-09-20T10:00:06.000Z","parentId":"e3"}
+{"type":"session.usage_checkpoint","data":{"totalNanoAiu":1000,"totalPremiumRequests":0},"id":"e8","timestamp":"2026-09-20T10:01:00.000Z","parentId":"e7"}
+{"type":"session.shutdown","data":{"shutdownType":"routine","totalNanoAiu":2000,"totalPremiumRequests":0,"currentModel":"gpt-5-mini","tokenDetails":{"input":{"tokenCount":100},"output":{"tokenCount":20},"cache_read":{"tokenCount":50},"cache_write":{"tokenCount":0}},"modelMetrics":{"gpt-5-mini":{"requests":{"count":2,"cost":0},"usage":{"inputTokens":100,"outputTokens":20,"cacheReadTokens":50,"cacheWriteTokens":0,"reasoningTokens":0},"totalNanoAiu":2000}}},"id":"e9","timestamp":"2026-09-20T10:02:00.000Z","parentId":"e8"}
+{"type":"session.resume","data":{"resumeTime":"2026-09-21T10:00:00.000Z"},"id":"e10","timestamp":"2026-09-21T10:00:00.000Z","parentId":null}
+{"type":"future.unknown_event","data":{"x":1},"id":"e11","timestamp":"2026-09-21T10:00:01.000Z","parentId":"e10"}
+{"type":"session.shutdown","data":{"shutdownType":"routine","totalNanoAiu":2000,"totalPremiumRequests":0,"currentModel":"gpt-5-mini","tokenDetails":{"input":{"tokenCount":100},"output":{"tokenCount":20},"cache_read":{"tokenCount":50},"cache_write":{"tokenCount":0}}},"id":"e12","timestamp":"2026-09-21T10:05:00.000Z","parentId":"e11"}
+{"type":"user.message","data":{"content":"SENTINEL_PROMPT"},"id":"e13","timesta

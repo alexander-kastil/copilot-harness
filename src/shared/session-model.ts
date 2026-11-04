@@ -87,6 +87,8 @@ export interface SessionSummary {
   nanoAiu?: number;
   /** Count of sidecar .json files (system prompts, tools, models) next to the log; counted, never copied (#9). */
   sidecarFiles?: number;
+  /** CLI rewind-snapshots folder of the session: path and number of backup entries; listed only (#10). */
+  snapshotDir?: { path: string; count: number };
 }
 
 export interface ReadResult {

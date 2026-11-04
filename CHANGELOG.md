@@ -9,3 +9,4 @@
 - Scaffold extension (#6): Scaffold for #6 is in place
 - Scaffold extension (#6): #7 is in and passes: 11 of 11 inventory tests pass. npm run compile is clean
 - Debug log and trace readers: Progress: 4/4 · report
+- Update src, test
