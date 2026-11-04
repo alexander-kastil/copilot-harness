@@ -103,3 +103,35 @@
 **Pattern:** Three times an agent's Bash call (an `npm test` to a log, a launch with `sleep 20` and `place-window.ps1`, a `Read` of an image) stayed pending 6 to 22 minutes with no process running and no output file growing.
 **Rule:** When the probe shows a pending call and a process check finds nothing behind it, `TaskStop` the agent and `SendMessage` it to resume with what it was doing and to run launches in the background or under a timeout; never wait for a second tick.
 **Replaces:** none
+
+## The owner's own request beats the handover hold
+
+**Pattern:** Over the handover threshold, the context mod's hold line says new tasks go to the handover. Three small requests the owner typed ("remove ... from root readme.md", "update root readme.md with commit feature and plugin hunter", "add a screenshot for plugin hunter") went into the handoff file instead of being done, and the owner answered "wtf about this request asshole", "do not ignore my requests", "then add it to the root readme.md what are you waiting for".
+**Rule:** A request the owner makes in that message is done in that turn when it is a few edits or one message to an existing agent; only new multi-agent work waits for the compaction, and the reply says which of the two it is.
+**Replaces:** none
+
+## A release waits only on its own repo's agents
+
+**Pattern:** The Copilot Harness 0.2.0 release was queued behind @classmkt, an agent writing a lesson in the class repo. The owner: "what does the marketplace teachin in another repo have to do with that???!!!!".
+**Rule:** A repo's end steps (changelog, commit, release) wait only for the agents writing in that repo; another repo's agent gets its own end steps in the run state, never a place in this repo's gate.
+**Replaces:** none
+
+## Solution: first Marketplace publish of copilot-harness
+
+**Problem:** "publish version 0.2.0 on the marketplace", with no Azure DevOps pipeline registered for the repo and `azure-pipelines.yml` written by an earlier session.
+**Solution:** `az pipelines create --name copilot-harness-marketplace --repository alexander-kastil/copilot-harness --repository-type github --branch master --yml-path azure-pipelines.yml --service-connection <the GitHub connection id of claude-harness's pipeline 98> --skip-first-run true`, then publish-vscode-ext's `authorize-pipeline.ps1 -ServiceConnectionId <sc-vscode-marketplace id> -PipelineId 99`, then `git push origin master:deploy`, which triggered the run.
+**Evidence:** `publish-status.sh ... --pipeline 99 --commit 5b06b49 --extension integrations-at.copilot-harness` printed `run=335 status=completed result=succeeded published=v0.2.0 marketplace=0.2.0 live=true` minutes after the push. The README images were broken on the details page, because the repo was private; the owner chose to make it public, and the publish skill now checks visibility before a first publish (standing rule 7).
+**Reuse:** Any new extension of the integrations-at publisher.
+**Replaces:** none
+
+## A blocked brief for an earlier request quotes that request
+
+**Pattern:** The creative check held back the brief for the class decks as drift ("Added, not asked for: updating the class repo's decks ... publishing to OneDrive"), although the owner had asked for exactly that 30 minutes before ("update the decks for changed modules only using /class-authoring-plugin:create-repo-pptx and publish to onedrive"); the check weighs the latest messages.
+**Rule:** A brief for a task the owner gave earlier in the session opens with that request verbatim and its time, so the check finds it.
+**Replaces:** none
+
+## The orchestration boundary line names a C: scratchpad
+
+**Pattern:** Every Agent brief got "Write temp files only under C:/Users/ALEXAN~1/AppData/Local/Temp/claude/<cwd slug>/<id>/scratchpad/...", built by agentic-orchestration's `scratchpadDir` from `TEMP`; the real scratchpad is under `CLAUDE_CODE_TMPDIR` (`D:\claude-scratch\claude\<hash>\<id>\scratchpad`). learn-changelog and @classmkt each wrote to D: against the brief, following the owner's never-C: rule.
+**Rule:** Until the mod reads `CLAUDE_CODE_TMPDIR`, briefs name a D: scratch folder themselves and delegates follow the never-C: rule over the boundary line.
+**Replaces:** none

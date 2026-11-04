@@ -2,8 +2,6 @@
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-11-04
-
 ### Added
 
 - Split Providers and Models pages: The Models and Providers pages are split, and the Overview has a "Providers" tile beside "PAYG models"
@@ -20,6 +18,7 @@
 - README feature screenshots: All 11 images are in and linked once each in README.md: the hero under # Copilot Harnes
 - Update src, tasks
 - AI Commit features and settings migration: Commit messages, PR messages and the one-time migration all work
+- AGENTS.md support like Claude Harness, and what GitHub's and VS Code's docs say AGENTS.md does
 
 ### Fixed
 
