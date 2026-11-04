@@ -6,6 +6,7 @@ import { registerSetupCheck } from './setup-check';
 import { registerCredits } from './credits';
 import { registerSnapshots } from './snapshots';
 import { registerOverview } from './overview-host';
+import { registerByok } from './byok';
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(vscode.commands.registerCommand('copilotHarness.open', () => HarnessPanel.show(context)));
@@ -17,6 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
   registerCredits(context, sessions);
   registerSnapshots(context, sessions);
   registerOverview(context, sessions);
+  registerByok(context);
   sessions.start();
 
   const status = vscode.window.createStatusBarItem('copilotHarness.status', vscode.StatusBarAlignment.Left, 0);

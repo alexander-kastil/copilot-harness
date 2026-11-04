@@ -12,3 +12,6 @@ node_modules/
 out/
 *.vsix
 media/webview/
+
+# Time ledger
+.time/

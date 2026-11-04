@@ -17,6 +17,11 @@
 - Snapshot store: every Copilot session kept as numbers only in the extension's storage, so sessions stay listed after Copilot deletes their files, with a size cap setting (#12).
 - Overview page like Claude Harness's: header with the asset and repository counts, one tile per customization kind, Last sessions, Repositories and Recently changed tabs with search, and the cards below.
 - BYOK models in Copilot Chat, ported from OAI Compatible Provider for Copilot and managed through the menu "Copilot Harness: Manage BYOK Models": providers, models and keys, five API modes, import from OAI Compatible, import and export, token meter and commit message generation (#38).
+- Port OAI Compatible into harness with menus: The Overview line is intact, and my "(#38)" line sits directly under it
+
+### Changed
+
+- The app icon is the Claude Harness node mark with the Copilot octicon in the centre node, replacing the goggles logo.
 
 ### Fixed
 
