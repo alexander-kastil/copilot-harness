@@ -2,7 +2,7 @@
   "name": "copilot-harness",
   "displayName": "Copilot Harness",
   "description": "Harness engineering for GitHub Copilot: see how your agents, skills, instructions and prompts work together across sessions and repositories.",
-  "version": "0.1.3",
+  "version": "0.1.7",
   "publisher": "integrations-at",
   "license": "SEE LICENSE IN LICENSE",
   "icon": "media/icon.png",
@@ -12,11 +12,16 @@
   },
   "author": {
     "name": "Alexander Kastil",
+    "email": "alexander.kastil@integrations.at",
     "url": "https://integrations.at/"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexander-kastil/gh-copilot-harness"
+    "url": "https://github.com/alexander-kastil/copilot-harness"
+  },
+  "homepage": "https://github.com/alexander-kastil/copilot-harness#readme",
+  "bugs": {
+    "url": "https://github.com/alexander-kastil/copilot-harness/issues"
   },
   "engines": {
     "vscode": "^1.119.0"

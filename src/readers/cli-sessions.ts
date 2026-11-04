@@ -7,7 +7,7 @@ import * as readline from 'node:readline';
 import { parse as parseYaml } from 'yaml';
 import { Env, copilotHome } from './paths';
 import { ScanIndex } from './scan-index';
-import { ReadResult, SessionSummary, SubagentRun, TokenFigures, UsageSnapshot } from '../shared/session-model';
+import { ReadResult, SessionSummary, SkillUse, SubagentRun, TokenFigures, UsageSnapshot } from '../shared/session-model';
 
 type Obj = Record<string, unknown>;
 
@@ -21,6 +21,12 @@ function num(v: unknown): number | undefined {
 
 function str(v: unknown): string | undefined {
   return typeof v === 'string' && v !== '' ? v : undefined;
+}
+
+/** First non-empty line of a workspace.yaml text value, trimmed. */
+function firstLine(v: unknown): string | undefined {
+  if (typeof v !== 'string') return undefined;
+  return v.split(/\r?\n/).map((l) => l.trim()).find((l) => l !== '');
 }
 
 /** Event types seen on real files plus the documented ones; anything else is counted as skipped. */
@@ -119,6 +125,7 @@ async function readSession(
   let turns = 0;
   let toolCalls = 0;
   let skills = 0;
+  const skillUses: SkillUse[] = [];
   const models = new Set<string>();
   const snapshots: UsageSnapshot[] = [];
   const subagents = new Map<string, SubagentRun>();
@@ -176,6 +183,7 @@ async function readSession(
           break;
         case 'skill.invoked':
           skills++;
+          if (str(data.name)) skillUses.push({ name: str(data.name)!, ...(str(ev.timestamp) ? { at: str(ev.timestamp)! } : {}) });
           break;
         case 'subagent.started': {
           const sid = str(data.toolCallId) ?? str(ev.id) ?? String(subagents.size);
@@ -224,7 +232,7 @@ async function readSession(
     workspace: cwd,
     repository: str(meta.repository),
     branch: str(meta.branch),
-    title: meta.user_named === true ? str(meta.name) : undefined,
+    title: firstLine(meta.name) ?? firstLine(meta.summary),
     start,
     end,
     turns,
@@ -234,6 +242,7 @@ async function readSession(
     toolCalls: sawEvents ? toolCalls : undefined,
     subagents: sawEvents ? runs : undefined,
     skills: sawEvents ? skills : undefined,
+    ...(skillUses.length ? { skillUses } : {}),
     usageSnapshots: snapshots,
     detail: snapshots.length ? 'totalsOnly' : 'none',
     provenance: {
@@ -243,6 +252,15 @@ async function readSession(
     skipped,
     snapshotDir: snapCount === undefined ? undefined : { path: snapDir, count: snapCount },
   };
+}
+
+async function titleOf(yamlFile: string): Promise<string | undefined> {
+  try {
+    const y = parseYaml(await fs.promises.readFile(yamlFile, 'utf8'));
+    return isObj(y) ? (firstLine(y.name) ?? firstLine(y.summary)) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function readCliSessions(env: Env, index?: ScanIndex<SessionSummary>): Promise<ReadResult> {
@@ -277,6 +295,11 @@ export async function readCliSessions(env: Env, index?: ScanIndex<SessionSummary
     seen.add(eventsFile);
     const cached = index?.get(eventsFile, size, mtimeMs);
     if (cached) {
+      // The persisted index keeps no titles: a hit takes it back from workspace.yaml (never events.jsonl).
+      if (cached.title === undefined) {
+        const title = await titleOf(yamlFile);
+        if (title) cached.title = title;
+      }
       sessions.push(cached);
       skipped += cached.skipped;
       continue;

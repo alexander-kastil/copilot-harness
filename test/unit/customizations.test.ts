@@ -28,14 +28,23 @@ const pick = (items: CustomizationItem[], kind: string) => items.filter((i) => i
 
 test('workspace scope: one item per customization with kind, scope and status', async () => {
   const items = await readWorkspace({ workspaceFolders: [app], parentLookup: false });
-  assert.equal(items.length, 14);
-  assert.ok(items.every((i) => i.scope === 'workspace' && !i.readOnly && !i.inParent));
-  assert.deepEqual(pick(items, 'instruction'), ['AGENTS.md:ok', 'TypeScript:ok', 'r:ok']);
-  assert.deepEqual(pick(items, 'agent'), ['Coder:ok', 'broken:invalid']);
+  assert.equal(items.length, 36);
+  assert.ok(items.every((i) => (i.scope === 'workspace' || i.scope === 'plugin') && !i.inParent));
+  // General instructions: always-on files and rules without paths; stack-specific: applyTo files and the folders the setting names.
+  assert.deepEqual(pick(items, 'instruction'), ['.copilot-instructions.md:ok', 'AGENTS.md:ok', 'a11y:ok', 'all:ok', 'r:ok', 'src/api/AGENTS.md:ok']);
+  assert.deepEqual(pick(items, 'stack'), ['TypeScript:ok', 'py:ok']);
+  assert.deepEqual(pick(items, 'agent'), ['Coder:ok', 'Hooked:ok', 'PlugAgent:ok', 'Quiet:ok', 'broken:invalid']);
+  assert.deepEqual(pick(items, 'subagent'), ['Coder:ok', 'Hooked:ok', 'PlugAgent:ok']);
+  assert.deepEqual(pick(items, 'plugin'), ['plug:ok']);
+  assert.deepEqual(pick(items, 'deterministic'), ['det:ok']);
+  assert.deepEqual(pick(items, 'agentic'), ['triage:ok']);
+  assert.deepEqual(pick(items, 'ci'), ['ci.yml:ok']);
+  assert.deepEqual(pick(items, 'env'), ['.devcontainer/devcontainer.json:ok', 'copilot-setup-steps.yml:ok']);
+  assert.deepEqual(pick(items, 'governance'), ['CODEOWNERS:ok']);
   assert.deepEqual(pick(items, 'prompt'), ['open:invalid', 'plan:ok']);
-  assert.deepEqual(pick(items, 'skill'), ['noname:incomplete', 's1:ok']);
-  assert.deepEqual(pick(items, 'hook'), ['broken.json:invalid', 'guard.json:ok', 'settings.json hooks:ok']);
-  assert.deepEqual(pick(items, 'mcp'), ['alpha:ok', 'beta:ok']);
+  assert.deepEqual(pick(items, 'skill'), ['halfdet:ok', 'noname:incomplete', 's1:ok']);
+  assert.deepEqual(pick(items, 'hook'), ['Hooked hooks:ok', 'broken.json:invalid', 'guard.json:ok', 'scanner:ok', 'settings.json hooks:ok']);
+  assert.deepEqual(pick(items, 'mcp'), ['alpha:ok', 'beta:ok', 'pm:ok']);
   const coder = items.find((i) => i.name === 'Coder')!;
   assert.deepEqual(coder.keys, ['name', 'description', 'tools', 'model']);
   assert.equal(typeof coder.mtime, 'number');
@@ -52,17 +61,17 @@ test('malformed frontmatter yields an item with a status, never an exception', a
 
 test('parent lookup off: only the workspace folder is read', async () => {
   const items = await readWorkspace({ workspaceFolders: [app], parentLookup: false });
-  assert.ok(!items.some((i) => i.name === 'rootskill' || i.file.endsWith('copilot-instructions.md')));
+  assert.ok(!items.some((i) => i.name === 'rootskill' || /[\\/]\.github[\\/]copilot-instructions\.md$/.test(i.file)));
 });
 
 test('parent lookup on: customizations up to the repo root are added and marked', async () => {
   assert.deepEqual(await parentFolders(app), [path.join(mono, 'packages'), mono]);
   assert.deepEqual(await parentFolders(mono), []);
   const items = await readWorkspace({ workspaceFolders: [app], parentLookup: true });
-  assert.equal(items.length, 17);
+  assert.equal(items.length, 39);
   const parents = items.filter((i) => i.inParent).map((i) => i.name).sort();
   assert.deepEqual(parents, ['copilot-instructions.md', 'root', 'rootskill']);
-  assert.ok(items.filter((i) => !i.inParent).length === 14);
+  assert.ok(items.filter((i) => !i.inParent).length === 36);
 });
 
 test('parent lookup stops at the first folder with .git', async () => {
@@ -113,7 +122,7 @@ test('installed plugin items are read-only and name their plugin; disabled state
 
 test('the whole inventory is the union of the scopes', async () => {
   const inv = await readCustomizations(env, { workspaceFolders: [app], parentLookup: false });
-  assert.equal(inv.items.length, 14 + 5 + 3 + 2 + 10);
+  assert.equal(inv.items.length, 36 + 5 + 3 + 2 + 10 + 2);
 });
 
 test('a missing home and no workspace give an empty inventory without error', async () => {
@@ -124,4 +133,18 @@ test('a missing home and no workspace give an empty inventory without error', as
 test('no file text reaches the items', async () => {
   const inv = await readCustomizations(env, { workspaceFolders: [app], parentLookup: true });
   assert.ok(!JSON.stringify(inv).includes('SENTINEL'));
+});
+
+test('Copilot Memory: one item per repository with a GitHub remote, its switch and its settings page; the local store when present', async () => {
+  const repoDir = path.join(work, 'memrepo');
+  fs.mkdirSync(path.join(repoDir, '.git'), { recursive: true });
+  fs.mkdirSync(path.join(repoDir, '.vscode'), { recursive: true });
+  fs.mkdirSync(path.join(repoDir, '.github'), { recursive: true });
+  fs.writeFileSync(path.join(repoDir, '.git', 'config'), '[core]\n\turl = nope\n[remote "upstream"]\n\turl = https://example.com/x/y.git\n[remote "origin"]\n\turl = git@github.com:acme/shop.git\n');
+  fs.writeFileSync(path.join(repoDir, '.vscode', 'settings.json'), '{ // on\n "chat.copilot.memory.enabled": true }\n');
+  fs.writeFileSync(path.join(repoDir, '.github', 'copilot-memories.jsonl'), 'SENTINEL_MEMORY\n');
+  const items = (await readWorkspace({ workspaceFolders: [repoDir], parentLookup: false })).filter((i) => i.kind === 'memory');
+  assert.deepEqual(items.map((i) => i.name).sort(), ['acme/shop: memory on', 'copilot-memories.jsonl']);
+  assert.equal(items.find((i) => i.url)?.url, 'https://github.com/acme/shop/settings/copilot/memory');
+  assert.ok(!JSON.stringify(items).includes('SENTINEL'));
 });

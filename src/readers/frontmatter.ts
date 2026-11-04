@@ -10,6 +10,17 @@ export interface Frontmatter {
   present: boolean;
   keys: string[];
   name?: string;
+  /** True when `disable-model-invocation: true` or the deprecated `infer: false` is set. */
+  disableModelInvocation?: boolean;
+  // True when applyTo matches every file (a double star, with or without a trailing slash and star, alone or in a list): always on.
+  alwaysOn?: boolean;
+}
+
+const EVERY_FILE = new Set(['**', '**/*']);
+
+function appliesToEveryFile(applyTo: unknown): boolean {
+  const parts = Array.isArray(applyTo) ? applyTo : typeof applyTo === 'string' ? applyTo.split(',') : [];
+  return parts.some((p) => typeof p === 'string' && EVERY_FILE.has(p.trim()));
 }
 
 const HEAD_BYTES = 64 * 1024;
@@ -26,7 +37,7 @@ export function parseFrontmatter(text: string): Frontmatter {
     const data: unknown = parseYaml(block);
     if (!data || typeof data !== 'object' || Array.isArray(data)) return { ok: false, present: true, keys: [] };
     const rec = data as Record<string, unknown>;
-    return { ok: true, present: true, keys: Object.keys(rec), name: typeof rec.name === 'string' && rec.name.trim() ? rec.name.trim() : undefined };
+    return { ok: true, present: true, keys: Object.keys(rec), name: typeof rec.name === 'string' && rec.name.trim() ? rec.name.trim() : undefined, disableModelInvocation: rec['disable-model-invocation'] === true || rec.infer === false, alwaysOn: appliesToEveryFile(rec.applyTo) };
   } catch {
     return { ok: false, present: true, keys: [] };
   }

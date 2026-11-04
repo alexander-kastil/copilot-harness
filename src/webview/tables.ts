@@ -5,7 +5,7 @@ type Cell = Node | string | (Node | string)[];
 
 /** A column: `track` is its CSS grid width; `num` right-aligns; `muted` dims; `wide` drops out when the panel is narrow; `low` drops out next. */
 export interface Column<R> {
-  head: string;
+  head: string | Node;
   track: string;
   cls?: string;
   num?: boolean;

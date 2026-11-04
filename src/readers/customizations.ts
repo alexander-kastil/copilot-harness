@@ -15,7 +15,9 @@ import {
   scanSkillsDir,
   type ScanContext,
 } from './customization-scan';
-import { copilotHome, userDataDirs, userDir, type Env } from './paths';
+import { agentHooksOf, classifyRules, dedupe, readPathSetting, scanInstructionLocations, scanCopilotMemory, scanNestedAgentsMd, scanPluginLocations } from './customization-extra';
+import { scanCliTrust, scanHarnessRoot, scanToolSets, subagentsOf } from './customization-harness';
+import { copilotHome, currentEnv, userDataDirs, userDir, type Env } from './paths';
 
 const INSTRUCTION = ['.instructions.md'];
 const AGENT = ['.agent.md', '.md'];
@@ -26,14 +28,34 @@ async function scanWorkspaceRoot(root: string, inParent: boolean): Promise<Custo
   const gh = path.join(root, '.github');
   const claude = path.join(root, '.claude');
   const out: CustomizationItem[] = [];
-  out.push(...(await scanNamedFiles(ctx, 'instruction', [path.join(gh, 'copilot-instructions.md'), path.join(root, 'AGENTS.md'), path.join(root, 'CLAUDE.md'), path.join(claude, 'CLAUDE.md')])));
-  out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'instructions'), 'instruction', INSTRUCTION)));
-  out.push(...(await scanMarkdownDir(ctx, path.join(claude, 'rules'), 'instruction', ['.md'])));
+  // General instructions: always-on files. Stack-specific instructions: loaded when their applyTo (or paths) matches.
+  out.push(
+    ...(await scanNamedFiles(ctx, 'instruction', [
+      path.join(gh, 'copilot-instructions.md'),
+      path.join(root, '.copilot-instructions.md'),
+      path.join(root, 'AGENTS.md'),
+      path.join(root, 'CLAUDE.md'),
+      path.join(claude, 'CLAUDE.md'),
+    ]))
+  );
+  if (!inParent) {
+    out.push(...(await scanNestedAgentsMd(ctx, root)));
+    const userSettings = userDataDirs(currentEnv()).map((v) => path.join(userDir(v.dir), 'settings.json'));
+    out.push(...(await scanCopilotMemory(ctx, root, userSettings)));
+  }
+  out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'instructions'), 'stack', INSTRUCTION)));
+  out.push(...classifyRules(await scanMarkdownDir(ctx, path.join(claude, 'rules'), 'instruction', ['.md'])));
+  const settings = path.join(root, '.vscode', 'settings.json');
+  out.push(...(await scanInstructionLocations(ctx, await readPathSetting(settings, 'chat.instructionsFilesLocations'), root)));
   out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'prompts'), 'prompt', ['.prompt.md'])));
   out.push(...(await scanMarkdownDir(ctx, path.join(gh, 'agents'), 'agent', AGENT)));
   out.push(...(await scanMarkdownDir(ctx, path.join(claude, 'agents'), 'agent', ['.md'])));
   for (const d of [path.join(gh, 'skills'), path.join(claude, 'skills'), path.join(root, '.agents', 'skills')]) out.push(...(await scanSkillsDir(ctx, d)));
   for (const f of await listJson(path.join(gh, 'hooks'))) out.push(...(await scanHookFile(ctx, f)));
+  // A hook installed as a folder (awesome-copilot): .github/hooks/<name>/hooks.json next to its scripts, named after the folder.
+  for (const dir of await subdirs(path.join(gh, 'hooks'))) {
+    for (const hit of await scanHookFile(ctx, path.join(dir, 'hooks.json'))) out.push({ ...hit, name: path.basename(dir) });
+  }
   out.push(...(await scanHookFile(ctx, path.join(gh, 'hooks.json'))));
   for (const f of ['settings.json', 'settings.local.json']) out.push(...(await scanHookFile(ctx, path.join(claude, f), 'hooks')));
   out.push(...(await scanMcpFile(ctx, path.join(root, '.vscode', 'mcp.json'), 'servers')));
@@ -43,7 +65,11 @@ async function scanWorkspaceRoot(root: string, inParent: boolean): Promise<Custo
     const items = await scanPluginDir('workspace', dir, `${name}@workspace`, name, true);
     out.push(...items.map((i) => (inParent ? { ...i, inParent: true } : i)));
   }
-  return out;
+  const located = await scanPluginLocations('workspace', await readPathSetting(settings, 'chat.pluginLocations'), root);
+  out.push(...located.map((i) => (inParent ? { ...i, inParent: true } : i)));
+  out.push(...(await scanHarnessRoot(root, ctx)));
+  const found = dedupe(out);
+  return [...found, ...(await subagentsOf(found)), ...agentHooksOf(found)];
 }
 
 async function listJson(dir: string): Promise<string[]> {
@@ -97,11 +123,15 @@ export async function readWorkspace(opts: InventoryOptions): Promise<Customizati
 
 async function scanUserDir(ctx: ScanContext, user: string): Promise<CustomizationItem[]> {
   const prompts = path.join(user, 'prompts');
+  const settings = path.join(user, 'settings.json');
   return [
     ...(await scanMarkdownDir(ctx, prompts, 'prompt', ['.prompt.md'])),
     ...(await scanMarkdownDir(ctx, prompts, 'agent', ['.agent.md'])),
-    ...(await scanMarkdownDir(ctx, prompts, 'instruction', INSTRUCTION)),
+    ...(await scanMarkdownDir(ctx, prompts, 'stack', INSTRUCTION)),
     ...(await scanMcpFile(ctx, path.join(user, 'mcp.json'), 'servers')),
+    ...(await scanToolSets(ctx, prompts)),
+    ...(await scanInstructionLocations(ctx, await readPathSetting(settings, 'chat.instructionsFilesLocations'), undefined)),
+    ...(await scanPluginLocations('userProfile', await readPathSetting(settings, 'chat.pluginLocations'), undefined, ctx.origin)),
   ];
 }
 
@@ -125,10 +155,11 @@ export async function readCopilotHome(env: Env): Promise<CustomizationItem[]> {
   const ctx: ScanContext = { scope: 'copilotHome' };
   return [
     ...(await scanSkillsDir(ctx, path.join(home, 'skills'))),
-    ...(await scanMarkdownDir(ctx, path.join(home, 'instructions'), 'instruction', INSTRUCTION)),
+    ...(await scanMarkdownDir(ctx, path.join(home, 'instructions'), 'stack', INSTRUCTION)),
     ...(await scanMarkdownDir(ctx, path.join(home, 'agents'), 'agent', AGENT)),
     ...(await scanNamedFiles(ctx, 'instruction', [path.join(home, 'copilot-instructions.md')])),
     ...(await scanMcpFile(ctx, path.join(home, 'mcp-config.json'), 'mcpServers')),
+    ...(await scanCliTrust(ctx, path.join(home, 'config.json'))),
   ];
 }
 
@@ -138,8 +169,9 @@ export async function readHome(env: Env): Promise<CustomizationItem[]> {
   const claude = path.join(env.home, '.claude');
   return [
     ...(await scanNamedFiles(ctx, 'instruction', [path.join(claude, 'CLAUDE.md')])),
-    ...(await scanMarkdownDir(ctx, path.join(claude, 'rules'), 'instruction', ['.md'])),
+    ...classifyRules(await scanMarkdownDir(ctx, path.join(claude, 'rules'), 'instruction', ['.md'])),
     ...(await scanMarkdownDir(ctx, path.join(claude, 'agents'), 'agent', ['.md'])),
+    ...(await scanMcpFile(ctx, path.join(env.home, '.mcp.json'), 'mcpServers')),
     ...(await scanSkillsDir(ctx, path.join(claude, 'skills'))),
     ...(await scanSkillsDir(ctx, path.join(env.home, '.agents', 'skills'))),
     ...(await scanHookFile(ctx, path.join(claude, 'settings.json'), 'hooks')),
@@ -149,5 +181,7 @@ export async function readHome(env: Env): Promise<CustomizationItem[]> {
 /** The whole inventory: one item per customization across all scopes. */
 export async function readCustomizations(env: Env, opts: InventoryOptions): Promise<Inventory> {
   const parts = await Promise.all([readWorkspace(opts), readUserProfile(env), readCopilotHome(env), readHome(env), readInstalledPlugins(env)]);
-  return { items: parts.flat() };
+  // The workspace items carry their own subagents and agent hooks; the other scopes get them here.
+  const rest = dedupe(parts.slice(1).flat());
+  return { items: [...parts[0], ...rest, ...(await subagentsOf(rest)), ...agentHooksOf(rest)] };
 }

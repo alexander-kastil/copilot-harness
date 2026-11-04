@@ -100,7 +100,7 @@ test('tiles count global items per kind; the header counts follow', () => {
     now: NOW,
   });
   const by = Object.fromEntries(state.tiles.map((t) => [t.kind, t.count]));
-  assert.deepEqual(by, { instruction: 0, prompt: 0, agent: 0, skill: 2, hook: 0, mcp: 1, plugin: 0 });
+  assert.deepEqual(by, { instruction: 0, prompt: 0, agent: 0, skill: 2, hook: 0, mcp: 1, plugin: 0, deterministic: 0, memory: 0, stack: 0, subagent: 0, tool: 0, agentic: 0, ci: 0, env: 0, governance: 0 });
   assert.equal(state.globalAssets, 3);
   assert.equal(state.repositories, 1);
   assert.equal(state.sessionsReady, false);
@@ -155,5 +155,5 @@ test('recently changed: newest first over every scope, items without a time left
 test('nothing at all gives an empty page without error', () => {
   const state = computeOverview({ all: all({}), sessionsReady: true, globalItems: [], openFolders: [], repoItems: {}, now: NOW });
   assert.deepEqual([state.sessions, state.repos, state.changed], [[], [], []]);
-  assert.equal(state.tiles.length, 7);
+  assert.equal(state.tiles.length, 16);
 });

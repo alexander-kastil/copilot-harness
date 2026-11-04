@@ -1,0 +1,4 @@
+name: Copilot Setup Steps
+on: workflow_dispatch
+jobs:
+  copilot-setup-steps: {}

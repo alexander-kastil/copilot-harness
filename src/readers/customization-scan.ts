@@ -78,7 +78,8 @@ export async function markdownItem(ctx: ScanContext, kind: Kind, file: string, f
   if (!read) return item(ctx, kind, fallback, file, undefined, 'unreadable', []);
   const { fm, mtime } = read;
   const status: ItemStatus = !fm.ok ? 'invalid' : requireName && !fm.name ? 'incomplete' : 'ok';
-  return item(ctx, kind, fm.name ?? fallback, file, mtime, status, fm.keys);
+  // An instructions file whose applyTo matches every file is always on, so it is a general instruction.
+  return item(ctx, kind === 'stack' && fm.alwaysOn ? 'instruction' : kind, fm.name ?? fallback, file, mtime, status, fm.keys);
 }
 
 const stripSuffix = (file: string, suffixes: string[]): string => {
@@ -105,9 +106,29 @@ export async function scanSkillsDir(ctx: ScanContext, dir: string): Promise<Cust
   for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     const skillFile = path.join(dir, e.name, 'SKILL.md');
     if (!(await isFile(skillFile))) continue;
-    out.push(await markdownItem(ctx, 'skill', skillFile, e.name, true));
+    const skill = await markdownItem(ctx, 'skill', skillFile, e.name, true);
+    out.push((await isDeterministicSkill(path.join(dir, e.name), skillFile)) ? { ...skill, kind: 'deterministic' } : skill);
   }
   return out;
+}
+
+/**
+ * A deterministic skill hands its parameters to a bundled script: its folder has a scripts/ folder with a file in it
+ * and its SKILL.md body names a path under scripts/. Every other skill is instructions only (orchestration).
+ */
+async function isDeterministicSkill(folder: string, skillFile: string): Promise<boolean> {
+  let hasScript = false;
+  try {
+    hasScript = (await fs.readdir(path.join(folder, 'scripts'), { withFileTypes: true })).some((e) => e.isFile() || e.isDirectory());
+  } catch {
+    return false;
+  }
+  if (!hasScript || !(await listFiles(path.join(folder, 'scripts'), () => true)).length) return false;
+  try {
+    return /scripts[\\/][\w.-]/.test(await fs.readFile(skillFile, 'utf8'));
+  } catch {
+    return false;
+  }
 }
 
 /** Single markdown files named exactly (copilot-instructions.md, AGENTS.md, CLAUDE.md). */

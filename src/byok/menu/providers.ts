@@ -1,16 +1,10 @@
 import * as vscode from 'vscode';
-import {
-  API_MODES,
-  isProviderRow,
-  listProviders,
-  parseHeadersJson,
-  PROVIDER_ROW_PREFIX,
-  type ProviderSummary,
-} from '../../shared/byok-models';
+import { API_MODES, isProviderRow, listProviders, parseHeadersJson, type ProviderSummary } from '../../shared/byok-models';
 import type { HFApiMode, HFModelItem } from '../../shared/byok-types';
 import { MultiStepInput, type InputStep } from './multi-step-input';
 import { askPassword, checkKey, confirm, headerNames, keyHint, notify, type MenuContext, type ValueItem } from './prompts';
 import { addModels } from './models';
+import { createProvider, deleteProvider, updateProvider } from './ops';
 
 interface ProviderDraft {
   id: string;
@@ -129,15 +123,13 @@ export async function addProvider(ctx: MenuContext): Promise<void> {
   if (!(await MultiStepInput.run(askId)) || !draft.id) return;
 
   const headers = parseHeadersJson(draft.headers);
-  const row: HFModelItem = {
-    id: `${PROVIDER_ROW_PREFIX}${draft.id}`,
-    owned_by: draft.id,
+  await createProvider(ctx.store, {
+    id: draft.id,
     baseUrl: draft.baseUrl,
     apiMode: draft.apiMode,
-    ...(headers.ok && headers.value ? { headers: headers.value } : {}),
-  };
-  await ctx.store.setModels([...ctx.store.models(), row]);
-  if (draft.key) await ctx.store.setProviderKey(draft.id, draft.key);
+    headers: headers.ok ? headers.value : undefined,
+    key: draft.key,
+  });
   notify(`Provider ${draft.id} added.`);
 
   const items: ValueItem<boolean>[] = [
@@ -168,20 +160,8 @@ export async function editProvider(ctx: MenuContext, provider: ProviderSummary):
     if (!picked || picked.value === 'done') return;
     const patch = await askProviderField(picked.value, current);
     if (!patch) continue;
-    const owner = current.id.toLowerCase();
-    const models = ctx.store
-      .models()
-      .map((m) => (m.owned_by.toLowerCase() === owner ? applyPatch(m, patch) : m));
-    await ctx.store.setModels(models);
+    await updateProvider(ctx.store, current.id, patch);
   }
-}
-
-function applyPatch(model: HFModelItem, patch: Partial<HFModelItem>): HFModelItem {
-  const next = { ...model, ...patch };
-  for (const [k, v] of Object.entries(patch)) {
-    if (v === undefined) delete (next as Record<string, unknown>)[k];
-  }
-  return next;
 }
 
 async function askProviderField(field: string, current: ProviderSummary): Promise<Partial<HFModelItem> | undefined> {
@@ -232,9 +212,7 @@ export async function removeProviderKey(ctx: MenuContext, provider: ProviderSumm
 export async function removeProvider(ctx: MenuContext, provider: ProviderSummary): Promise<void> {
   const message = `Deletes ${provider.modelCount} model(s) and the stored key.`;
   if (!(await confirm(`Remove provider ${provider.id}`, message, 'Remove provider'))) return;
-  const owner = provider.id.toLowerCase();
-  await ctx.store.setModels(ctx.store.models().filter((m) => m.owned_by.toLowerCase() !== owner));
-  await ctx.store.deleteProviderKey(provider.id);
+  await deleteProvider(ctx.store, provider.id);
   notify(`Provider ${provider.id} removed.`);
 }
 

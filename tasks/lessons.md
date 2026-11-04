@@ -75,3 +75,17 @@
 **Evidence:** The owner answered the plan with "implement it"; one specialist run built it (72 tests pass, a model added through the menu showed under "Copilot Harness" in the chat model picker without a reload, in an isolated VS Code). The chat request path stayed untested there because that window had no GitHub sign-in.
 **Reuse:** The next port of a third-party VS Code extension into one of ours; the BYOK facts are in the github-copilot plugin's gh-copilot-byok leaves `vscode-chat` and `vscode-native`.
 **Replaces:** none
+
+## Solution: Marketplace publish parity with claude-harness needs approval, not data
+
+**Problem:** "make sure we can publish this project to the marketplace just like D:\git-projects\claude-harness ... do you need any data from me".
+**Solution:** One `vscode-extension:specialist` run copied claude-harness's `azure-pipelines.yml` (service connection `sc-vscode-marketplace`, workload identity, publishes only from `deploy` with `vsce publish --azure-credential`), added `homepage`, `bugs` and `author.email`, and excluded `.mcp.json`, `.time/**`, `tasks/**` and the pipeline file from the VSIX. The brief asked for "every piece of data or access only the owner can provide" with the exact names claude-harness uses, so the report answered the owner's question directly: no PAT, only approval to create the pipeline, authorize the connection for it and create `deploy`.
+**Evidence:** `vsce package` exit 0 (one bundling warning, 176 files); `vsce ls` lists only README, LICENSE, CHANGELOG, notices, `media/`, the tokenizer asset, `out/src` and the three runtime dependencies; the diffs were read on disk. The ADO steps wait for the owner's yes.
+**Reuse:** Any further extension of the `integrations-at` publisher; the playbook now says Steps 1 to 7 are per publisher.
+**Replaces:** none
+
+## A whole package.json in one read trips the lookup guard
+
+**Pattern:** The first comparison `cat` both repos' `package.json`; this repo's BYOK settings schema alone is several hundred lines, so the call passed the agentic-orchestration guard's 20,000 characters and the next lookup was refused.
+**Rule:** Compare manifests by the fields needed (`node -p "const p=require('./package.json');({version:p.version,publisher:p.publisher,repository:p.repository,homepage:p.homepage,bugs:p.bugs,scripts:p.scripts})"`), never the whole file; a wider comparison goes to the specialist or a fact gatherer.
+**Replaces:** none

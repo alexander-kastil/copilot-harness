@@ -189,7 +189,8 @@ export function computeOverview(input: OverviewInput): OverviewState {
     .slice(0, CHANGED_CAP);
 
   return {
-    globalAssets: globalItems.length,
+    // A subagent is an agent file seen again, so it is not counted twice.
+    globalAssets: globalItems.filter((i) => i.kind !== 'subagent').length,
     repositories: repos.length,
     tiles,
     sessions: merged.slice(0, SESSION_CAP).map(sessionRow),

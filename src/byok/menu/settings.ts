@@ -1,25 +1,8 @@
 import * as vscode from 'vscode';
+import { LANGUAGES, LOG_LEVELS, type GlobalField } from '../../shared/byok-models';
 import type { RetryConfig } from '../../shared/byok-types';
+import { currentRetry, writeGlobal } from './ops';
 import { askPassword, confirm, keyHint, notify, type MenuContext, type ValueItem } from './prompts';
-
-const LANGUAGES = [
-  'English',
-  'French',
-  'Italian',
-  'German',
-  'Spanish',
-  'Russian',
-  'Chinese (Simplified)',
-  'Chinese (Traditional)',
-  'Japanese',
-  'Korean',
-  'Czech',
-  'Portuguese (Brazil)',
-  'Turkish',
-  'Polish',
-];
-const LOG_LEVELS = ['off', 'debug', 'info', 'warn', 'error'];
-const DEFAULT_RETRY: RetryConfig = { enabled: true, max_attempts: 3, interval_ms: 1000, status_codes: [] };
 
 async function askNumber(title: string, current: number, min: number, max?: number): Promise<number | undefined> {
   const text = await vscode.window.showInputBox({
@@ -46,7 +29,7 @@ async function askChoice(title: string, options: string[], current: string): Pro
 export async function editGlobalSettings(ctx: MenuContext): Promise<void> {
   const store = ctx.store;
   for (;;) {
-    const retry = { ...DEFAULT_RETRY, ...store.setting<RetryConfig>('retry', DEFAULT_RETRY) };
+    const retry = currentRetry(store);
     const genericKey = await store.genericKey();
     const items: ValueItem<string>[] = [
       { label: '$(check) Done', value: 'done' },
@@ -82,7 +65,7 @@ export async function editGlobalSettings(ctx: MenuContext): Promise<void> {
 
 async function editOne(ctx: MenuContext, field: string, retry: RetryConfig, genericKey: string | undefined): Promise<void> {
   const store = ctx.store;
-  const saveRetry = (patch: RetryConfig) => store.setSetting('retry', { ...retry, ...patch });
+  const save = (name: GlobalField, value: unknown) => writeGlobal(store, name, value);
   switch (field) {
     case 'baseUrl': {
       const v = await vscode.window.showInputBox({
@@ -91,7 +74,7 @@ async function editOne(ctx: MenuContext, field: string, retry: RetryConfig, gene
         ignoreFocusOut: true,
         validateInput: (t) => (/^https?:\/\/\S+$/.test(t.trim()) ? undefined : 'Start with http:// or https://'),
       });
-      if (v !== undefined) await store.setSetting('baseUrl', v.trim());
+      if (v !== undefined) await save('baseUrl', v.trim());
       return;
     }
     case 'key': {
@@ -116,19 +99,19 @@ async function editOne(ctx: MenuContext, field: string, retry: RetryConfig, gene
     case 'delay':
     case 'readFileLines': {
       const n = await askNumber(field === 'delay' ? 'Delay in ms' : 'Read file lines', store.setting(field, 0), 0, field === 'delay' ? undefined : 10000);
-      if (n !== undefined) await store.setSetting(field, n);
+      if (n !== undefined) await save(field, n);
       return;
     }
     case 'retry.enabled': {
       const v = await askChoice('Retry enabled', ['true', 'false'], String(retry.enabled));
-      if (v) await saveRetry({ enabled: v === 'true' });
+      if (v) await save('retry.enabled', v === 'true');
       return;
     }
     case 'retry.max_attempts':
     case 'retry.interval_ms': {
       const key = field === 'retry.max_attempts' ? 'max_attempts' : 'interval_ms';
       const n = await askNumber(field, (retry[key] as number) ?? 1, 1);
-      if (n !== undefined) await saveRetry({ [key]: n });
+      if (n !== undefined) await save(field, n);
       return;
     }
     case 'retry.status_codes': {
@@ -151,13 +134,13 @@ async function editOne(ctx: MenuContext, field: string, retry: RetryConfig, gene
           .split(',')
           .map((s) => Number(s.trim()))
           .filter((n) => n > 0);
-        await saveRetry({ status_codes: codes });
+        await save('retry.status_codes', codes);
       }
       return;
     }
     case 'commitLanguage': {
       const v = await askChoice('Commit message language', LANGUAGES, store.setting('commitLanguage', 'English'));
-      if (v) await store.setSetting('commitLanguage', v);
+      if (v) await save('commitLanguage', v);
       return;
     }
     case 'commitMessagePrompt': {
@@ -167,12 +150,12 @@ async function editOne(ctx: MenuContext, field: string, retry: RetryConfig, gene
         value: store.setting('commitMessagePrompt', ''),
         ignoreFocusOut: true,
       });
-      if (v !== undefined) await store.setSetting('commitMessagePrompt', v);
+      if (v !== undefined) await save('commitMessagePrompt', v);
       return;
     }
     case 'logLevel': {
       const v = await askChoice('Log level', LOG_LEVELS, store.setting('logLevel', 'off'));
-      if (v) await store.setSetting('logLevel', v);
+      if (v) await save('logLevel', v);
       return;
     }
   }

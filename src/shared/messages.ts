@@ -10,7 +10,13 @@ export type ToWebview =
   | { type: 'setupResult'; key: string; ok: boolean; message: string }
   | { type: 'credits'; state: import('./credits').CreditsState }
   | { type: 'snapshots'; state: import('./snapshots').SnapshotsState }
-  | { type: 'overview'; state: import('./overview').OverviewState };
+  | { type: 'overview'; state: import('./overview').OverviewState }
+  | { type: 'nav'; state: import('./nav').NavState }
+  | { type: 'payg'; state: import('./payg').PaygState }
+  | import('./element').ElementToWebview
+  | import('./hunt').HuntToWebview
+  | import('./markets').MarketsToWebview
+  | import('./sessions').SessionsToWebview;
 
 /** Webview to host. */
 export type ToHost =
@@ -20,4 +26,10 @@ export type ToHost =
   | { type: 'setupRecheck' }
   | { type: 'creditsManualQuota'; used: number }
   | { type: 'creditsClearManual' }
-  | { type: 'creditsReadGithub' };
+  | { type: 'creditsReadGithub' }
+  | import('./nav').NavToHost
+  | import('./element').ElementToHost
+  | import('./payg').PaygToHost
+  | import('./hunt').HuntToHost
+  | import('./markets').MarketsToHost
+  | import('./sessions').SessionsToHost;

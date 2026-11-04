@@ -13,7 +13,7 @@ const env: Env = { home: fixtureRoot, platform: 'win32' };
 
 test('lists a CLI session with repository, branch, start, end, models and counts', async () => {
   const r = await readCliSessions(env);
-  assert.equal(r.sessions.length, 2);
+  assert.equal(r.sessions.length, 3);
   const s = r.sessions.find((x) => x.id === 's1')!;
   assert.equal(s.workspace, 'D:\\work\\proj');
   assert.equal(s.repository, 'owner/proj');
@@ -53,13 +53,14 @@ test('an unknown event type and a truncated last line are counted and skipped', 
   assert.equal(r.skipped, 2);
 });
 
-test('a session without events lists from workspace.yaml; only a user-given name is kept as title', async () => {
+test('a session without events lists from workspace.yaml; the title is the name or summary, first line only', async () => {
   const r = await readCliSessions(env);
   const s2 = r.sessions.find((x) => x.id === 's2')!;
   assert.equal(s2.title, 'Named by user');
   assert.equal(s2.toolCalls, undefined);
   assert.equal(s2.detail, 'none');
-  assert.equal(r.sessions.find((x) => x.id === 's1')!.title, undefined);
+  assert.equal(r.sessions.find((x) => x.id === 's1')!.title, 'Auto name');
+  assert.equal(r.sessions.find((x) => x.id === 's3')!.title, 'Older summary line');
 });
 
 test('no message text reaches the result', async () => {
@@ -70,6 +71,19 @@ test('without a .copilot folder the result is empty and has no error', async () 
   const r = await readCliSessions({ home: path.join(fixtureRoot, 'none'), platform: 'win32' });
   assert.deepEqual(r.sessions, []);
   assert.equal(r.skipped, 0);
+});
+
+test('a cached entry without a title gets it back from workspace.yaml', async () => {
+  const first = new ScanIndex<SessionSummary>();
+  await readCliSessions(env, first);
+  // What the persisted index holds: every entry with its title stripped.
+  const stripped = JSON.parse(JSON.stringify(first.toJSON(), (k, v) => (k === 'title' ? undefined : v)));
+  const restored = new ScanIndex<SessionSummary>(stripped);
+  assert.ok(!JSON.stringify(stripped).includes('"title"'));
+  const r = await readCliSessions(env, restored);
+  assert.equal(r.sessions.find((x) => x.id === 's1')!.title, 'Auto name');
+  assert.equal(r.sessions.find((x) => x.id === 's2')!.title, 'Named by user');
+  assert.equal(r.sessions.find((x) => x.id === 's3')!.title, 'Older summary line');
 });
 
 test('a second scan of unchanged sessions does not read events.jsonl', async () => {
@@ -88,7 +102,7 @@ test('a second scan of unchanged sessions does not read events.jsonl', async () 
     };
     try {
       const second = await readCliSessions(e, index);
-      assert.equal(second.sessions.length, 2);
+      assert.equal(second.sessions.length, 3);
       assert.deepEqual(opened, []);
     } finally {
       rawFs.createReadStream = real;

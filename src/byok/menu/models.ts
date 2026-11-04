@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
 import {
   formatModelId,
-  isProviderRow,
   listProviders,
-  parseHeadersJson,
+  MODEL_FIELDS,
+  parseFieldText,
   sameModel,
+  validateFieldText,
+  type FieldDef,
+  type FieldParse,
   type ProviderSummary,
 } from '../../shared/byok-models';
 import type { HFModelItem } from '../../shared/byok-types';
 import { MultiStepInput, type InputStep } from './multi-step-input';
+import { createModels, deleteModel, updateModel } from './ops';
 import { checkKey, confirm, headerNames, notify, type MenuContext, type ValueItem } from './prompts';
 
 const TITLE = 'Add model';
@@ -182,83 +186,15 @@ export async function addModels(ctx: MenuContext, presetProvider?: string): Prom
   const provider = draft.provider;
   if (!provider || draft.ids.length === 0) return;
 
-  const owner = provider.id.toLowerCase();
-  const models = ctx.store.models().filter((m) => !(isProviderRow(m) && m.owned_by.toLowerCase() === owner));
-  const added: string[] = [];
-  const skipped: string[] = [];
-  for (const id of draft.ids) {
-    if (models.some((m) => sameModel(m, { id }))) {
-      skipped.push(id);
-      continue;
-    }
-    models.push({
-      id,
-      owned_by: provider.id,
-      baseUrl: provider.baseUrl,
-      apiMode: provider.apiMode,
-      ...(provider.headers ? { headers: provider.headers } : {}),
-      context_length: Number(draft.contextLength),
-      max_tokens: Number(draft.maxTokens),
-      vision: draft.vision,
-      ...(draft.displayName.trim() && draft.ids.length === 1 ? { displayName: draft.displayName.trim() } : {}),
-    });
-    added.push(id);
-  }
-  await ctx.store.setModels(models);
+  const { added, skipped } = await createModels(ctx.store, provider, draft.ids, {
+    contextLength: Number(draft.contextLength),
+    maxTokens: Number(draft.maxTokens),
+    vision: draft.vision,
+    displayName: draft.displayName,
+  });
   const tail = skipped.length ? ` Already present: ${skipped.join(', ')}.` : '';
   notify(`${added.length} model(s) added to ${provider.id}.${tail}`);
 }
-
-type FieldKind = 'string' | 'number' | 'boolean' | 'enum' | 'json' | 'headers';
-
-interface FieldDef {
-  key: keyof HFModelItem;
-  label: string;
-  kind: FieldKind;
-  options?: string[];
-  min?: number;
-  max?: number;
-  integer?: boolean;
-}
-
-const EFFORTS = ['max', 'xhigh', 'high', 'medium', 'low', 'minimal'];
-
-export const MODEL_FIELDS: FieldDef[] = [
-  { key: 'id', label: 'Model ID', kind: 'string' },
-  { key: 'displayName', label: 'Display name', kind: 'string' },
-  { key: 'configId', label: 'Config ID', kind: 'string' },
-  { key: 'owned_by', label: 'Provider (owned_by)', kind: 'string' },
-  { key: 'family', label: 'Family', kind: 'string' },
-  { key: 'baseUrl', label: 'Base URL', kind: 'string' },
-  {
-    key: 'apiMode',
-    label: 'API mode',
-    kind: 'enum',
-    options: ['openai', 'openai-responses', 'ollama', 'anthropic', 'gemini'],
-  },
-  { key: 'context_length', label: 'Context length', kind: 'number', min: 1000, max: 10_000_000, integer: true },
-  { key: 'max_tokens', label: 'Max tokens', kind: 'number', min: 1, max: 10_000_000, integer: true },
-  { key: 'max_completion_tokens', label: 'Max completion tokens', kind: 'number', min: 1, max: 10_000_000, integer: true },
-  { key: 'vision', label: 'Vision', kind: 'boolean' },
-  { key: 'reasoning_effort', label: 'Reasoning effort (picker)', kind: 'enum', options: EFFORTS },
-  { key: 'thinking', label: 'Thinking (Zai)', kind: 'json' },
-  { key: 'enable_thinking', label: 'Enable thinking', kind: 'boolean' },
-  { key: 'thinking_budget', label: 'Thinking budget', kind: 'number', min: 128, max: 10_000_000, integer: true },
-  { key: 'temperature', label: 'Temperature', kind: 'number', min: 0, max: 2 },
-  { key: 'top_p', label: 'Top p', kind: 'number', min: 0, max: 1 },
-  { key: 'top_k', label: 'Top k', kind: 'number', min: 1, integer: true },
-  { key: 'min_p', label: 'Min p', kind: 'number', min: 0, max: 1 },
-  { key: 'frequency_penalty', label: 'Frequency penalty', kind: 'number', min: -2, max: 2 },
-  { key: 'presence_penalty', label: 'Presence penalty', kind: 'number', min: -2, max: 2 },
-  { key: 'repetition_penalty', label: 'Repetition penalty', kind: 'number', min: 0, max: 2 },
-  { key: 'reasoning', label: 'Reasoning (OpenRouter, xAI)', kind: 'json' },
-  { key: 'extra', label: 'Extra request body', kind: 'json' },
-  { key: 'headers', label: 'Headers', kind: 'headers' },
-  { key: 'include_reasoning_in_request', label: 'Send reasoning back', kind: 'boolean' },
-  { key: 'useForCommitGeneration', label: 'Use for commit messages', kind: 'boolean' },
-  { key: 'delay', label: 'Delay between requests (ms)', kind: 'number', min: 0, integer: true },
-  { key: 'cache_control', label: 'Anthropic cache control', kind: 'boolean' },
-];
 
 function describe(def: FieldDef, value: unknown): string {
   if (value === undefined) return '(not set)';
@@ -289,33 +225,11 @@ async function askValue(def: FieldDef, current: unknown): Promise<unknown | type
     value: shown,
     ignoreFocusOut: true,
     prompt: def.key === 'id' ? undefined : 'Empty removes the value.',
-    validateInput: (v) => {
-      const t = v.trim();
-      if (!t) return def.key === 'id' || def.key === 'owned_by' ? 'A value is required.' : undefined;
-      if (def.kind === 'number') {
-        const n = Number(t);
-        if (!Number.isFinite(n) || (def.integer && !Number.isInteger(n))) return 'Enter a number.';
-        if (def.min !== undefined && n < def.min) return `At least ${def.min}.`;
-        if (def.max !== undefined && n > def.max) return `At most ${def.max}.`;
-      }
-      if (def.kind === 'headers' && !parseHeadersJson(t).ok) return 'Enter a JSON object of string values.';
-      if (def.kind === 'json') {
-        try {
-          const p = JSON.parse(t);
-          if (!p || typeof p !== 'object' || Array.isArray(p)) return 'Enter a JSON object.';
-        } catch {
-          return 'Enter valid JSON.';
-        }
-      }
-      return undefined;
-    },
+    validateInput: (v) => validateFieldText(def, v),
   });
   if (text === undefined) return undefined;
-  const t = text.trim();
-  if (!t) return UNSET;
-  if (def.kind === 'number') return Number(t);
-  if (def.kind === 'json' || def.kind === 'headers') return JSON.parse(t);
-  return t;
+  const parsed = parseFieldText(def, text);
+  return parsed.ok && !parsed.unset ? parsed.value : UNSET;
 }
 
 export async function editModel(ctx: MenuContext, model: HFModelItem): Promise<void> {
@@ -337,22 +251,19 @@ export async function editModel(ctx: MenuContext, model: HFModelItem): Promise<v
     if (!picked?.def) return;
     const value = await askValue(picked.def, current[picked.def.key]);
     if (value === undefined) continue;
-    const next: HFModelItem = { ...current };
-    if (value === UNSET) delete (next as unknown as Record<string, unknown>)[picked.def.key];
-    else (next as unknown as Record<string, unknown>)[picked.def.key] = value;
-    const all = ctx.store.models();
-    if (!sameModel(next, current) && all.some((m) => sameModel(m, next))) {
-      void vscode.window.showErrorMessage(`Model ${formatModelId(next)} already exists.`);
+    const parsed: FieldParse = value === UNSET ? { ok: true, unset: true } : { ok: true, unset: false, value };
+    const result = await updateModel(ctx.store, current, picked.def.key, parsed);
+    if (!result.ok) {
+      void vscode.window.showErrorMessage(result.error);
       continue;
     }
-    await ctx.store.setModels(all.map((m) => (sameModel(m, current) ? next : m)));
-    current = next;
+    current = result.model;
   }
 }
 
 export async function removeModel(ctx: MenuContext, model: HFModelItem): Promise<void> {
   const name = formatModelId(model);
   if (!(await confirm(`Remove model ${name}`, 'The model disappears from the picker.', 'Remove model'))) return;
-  await ctx.store.setModels(ctx.store.models().filter((m) => !sameModel(m, model)));
+  await deleteModel(ctx.store, model);
   notify(`Model ${name} removed.`);
 }

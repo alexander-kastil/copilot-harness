@@ -1,0 +1,37 @@
+# Packages copilot-harness on every run; publishes to the Visual Studio Marketplace only from the deploy branch.
+# Authenticates through sc-vscode-marketplace (workload identity federation, no PAT). A branch control check
+# on that connection allows refs/heads/deploy only, so the publish step is compiled in for deploy runs alone.
+trigger:
+  branches:
+    include:
+      - deploy
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UseNode@1
+    displayName: Use Node 22
+    inputs:
+      version: 22.x
+
+  - script: npm ci
+    displayName: npm ci
+
+  - script: npm install -g @vscode/vsce
+    displayName: Install vsce
+
+  - script: |
+      vsce --version
+      vsce package
+    displayName: Package
+
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/deploy') }}:
+      - task: AzureCLI@2
+        displayName: Publish to the Marketplace
+        inputs:
+          azureSubscription: sc-vscode-marketplace
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: vsce publish --azure-credential

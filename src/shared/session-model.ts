@@ -17,6 +17,13 @@ export interface TokenFigures {
 
 export type FigureName = 'tokens' | 'cachedTokens' | 'credits' | 'toolCalls' | 'subagents' | 'skills' | 'models';
 
+/** One call of a skill in a session (a `skill.invoked` event of Copilot CLI). */
+export interface SkillUse {
+  name: string;
+  /** ISO 8601 of the event. */
+  at?: string;
+}
+
 export interface SubagentRun {
   id: string;
   /** Id of the tool call or span that started the run, when the source gives one. */
@@ -75,6 +82,8 @@ export interface SessionSummary {
   toolCalls?: number;
   subagents?: SubagentRun[];
   skills?: number;
+  /** The skills called, by name, one entry per call; only sources that record the name carry it. */
+  skillUses?: SkillUse[];
   usageSnapshots?: UsageSnapshot[];
   detail: SessionDetail;
   /** Which source supplied each figure; differs from `source` once #12 or #13 merges records. */

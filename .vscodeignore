@@ -22,6 +22,11 @@ scripts/**
 research/**
 handoff.md
 CLAUDE.md
+.mcp.json
+.time/**
+tasks/**
+azure-pipelines.yml
 !node_modules/@microsoft/tiktokenizer/package.json
 !node_modules/@microsoft/tiktokenizer/LICENSE
 !node_modules/@microsoft/tiktokenizer/dist/**/*.js
+docs/**

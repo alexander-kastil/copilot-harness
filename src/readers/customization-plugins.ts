@@ -6,6 +6,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type { CustomizationItem } from '../shared/customizations';
 import { copilotHome, type Env } from './paths';
+import { readMarkets } from './markets';
 import {
   isDir,
   makeItem,
@@ -61,10 +62,18 @@ export async function scanPluginDir(scope: Scope, dir: string, id: string, fallb
   for (const d of paths(dir, manifest.agents, 'agents')) out.push(...(await scanMarkdownDir(ctx, d, 'agent', ['.agent.md', '.md'])));
   for (const d of paths(dir, manifest.commands, 'commands')) out.push(...(await scanMarkdownDir(ctx, d, 'prompt', ['.prompt.md', '.md'])));
 
-  const hookFiles = typeof manifest.hooks === 'string' ? paths(dir, manifest.hooks, '') : [path.join(dir, 'hooks', 'hooks.json'), path.join(dir, 'copilot-hooks.json')];
+  // The Copilot namespace folder: agents, hooks and slash commands that only Copilot reads.
+  const ns = path.join(dir, 'com.github.copilot');
+  out.push(...(await scanMarkdownDir(ctx, path.join(ns, 'agents'), 'agent', ['.agent.md'])));
+  out.push(...(await scanMarkdownDir(ctx, path.join(ns, 'commands'), 'prompt', ['.prompt.md', '.md'])));
+
+  const hookFiles =
+    typeof manifest.hooks === 'string'
+      ? paths(dir, manifest.hooks, '')
+      : [path.join(dir, 'hooks', 'hooks.json'), path.join(dir, 'copilot-hooks.json'), path.join(ns, 'hooks', 'hooks.json')];
   for (const f of hookFiles) out.push(...(await scanHookFile(ctx, f)));
 
-  const mcpFiles = typeof manifest.mcpServers === 'string' ? paths(dir, manifest.mcpServers, '') : [path.join(dir, '.mcp.json')];
+  const mcpFiles = typeof manifest.mcpServers === 'string' ? paths(dir, manifest.mcpServers, '') : [path.join(dir, '.mcp.json'), path.join(dir, 'mcp.json')];
   for (const f of mcpFiles) out.push(...(await scanMcpFile(ctx, f, 'mcpServers')));
   return out;
 }
@@ -111,6 +120,13 @@ export async function readInstalledPlugins(env: Env): Promise<CustomizationItem[
       const id = `${plugin}@${marketplace}`;
       const fromSettings = enabledMap[id];
       out.push(...(await scanPluginDir('plugin', dir, id, plugin, fromSettings !== false, marketplace)));
+    }
+  }
+
+  // A plugin from a local folder marketplace is loaded live from that folder and never copied, so neither list above has it.
+  for (const market of readMarkets(env)) {
+    for (const p of market.plugins) {
+      if (p.live && p.dir) out.push(...(await scanPluginDir('plugin', p.dir, p.key, p.name, p.enabled, market.name)));
     }
   }
   return out;
