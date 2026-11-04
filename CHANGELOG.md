@@ -6,6 +6,31 @@
 
 ### Added
 
+- Split Providers and Models pages: The Models and Providers pages are split, and the Overview has a "Providers" tile beside "PAYG models"
+- Sessions pages and AI features: I built the Sessions page and the session detail page
+- Update .vscodeignore, azure-pipelines.yml
+- Update src
+- Update src, test
+- Update test
+- Drop CLAUDE.md, add six tiles: Copilot Memory now shows as its own kind, "Copilot Memory", in the nav (global and per repository), the
+- Claude Harness UI style and AI actions: The element page now opens a Copilot Memory item's url in the browser and no longer opens or
+- Drop CLAUDE.md, add six tiles: Skills are now split into two kinds, and both show in the Overview tiles, the nav (global and per
+- Update CLAUDE.md
+- Update docs
+- README feature screenshots: All 11 images are in and linked once each in README.md: the hero under # Copilot Harnes
+- Update src, tasks
+- AI Commit features and settings migration: Commit messages, PR messages and the one-time migration all work
+
+### Fixed
+
+- Claude Harness UI style and AI actions: A skill's element page now has a "Used in" tab, and the isolated VS Code check shows the fixture
+
+
+
+## [0.2.0] - 2026-11-04
+
+### Added
+
 - Research on whether a VS Code extension like Claude Harness exists for GitHub Copilot, and a Copilot harness for this repo based on the Agentic Software Engineering class.
 - Implementation plan as GitHub issues #1 to #37 (four phases, 32 tasks), and research on a separate Copilot Studio harness extension.
 - Copilot Harness extension scaffold: webview panel with a typed message contract, vsce packaging, GitHub Actions CI, logo and a status bar item that opens the panel (#6).
