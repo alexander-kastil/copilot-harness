@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import { readAllSessions, type AllSessions, type ReaderIndexes } from './readers/all-sessions';
 import type { Env } from './readers/paths';
-import { ScanIndex } from './readers/scan-index';
+import { ScanIndex, type IndexData } from './readers/scan-index';
 import type { SessionSummary } from './shared/session-model';
 
 export type SessionProcessor = (all: AllSessions) => AllSessions | Promise<AllSessions>;
@@ -31,6 +31,24 @@ export class SessionService implements vscode.Disposable {
 
   get latest(): AllSessions | undefined {
     return this.last;
+  }
+
+  /** The four scan indexes as plain data, for #12 to keep between VS Code sessions. */
+  exportIndexes(): Record<keyof ReaderIndexes, IndexData<unknown>> {
+    return {
+      chatSessions: this.indexes.chatSessions.toJSON(),
+      debugLogs: this.indexes.debugLogs.toJSON(),
+      traceDb: this.indexes.traceDb.toJSON(),
+      cli: this.indexes.cli.toJSON(),
+    };
+  }
+
+  /** Replaces the indexes with saved data; call before the first read. */
+  restoreIndexes(data: Partial<Record<keyof ReaderIndexes, IndexData<unknown>>>): void {
+    if (data.chatSessions) this.indexes.chatSessions = new ScanIndex<SessionSummary>(data.chatSessions as IndexData<SessionSummary>);
+    if (data.debugLogs) this.indexes.debugLogs = new ScanIndex<SessionSummary>(data.debugLogs as IndexData<SessionSummary>);
+    if (data.traceDb) this.indexes.traceDb = new ScanIndex<SessionSummary[]>(data.traceDb as IndexData<SessionSummary[]>);
+    if (data.cli) this.indexes.cli = new ScanIndex<SessionSummary>(data.cli as IndexData<SessionSummary>);
   }
 
   addProcessor(processor: SessionProcessor): vscode.Disposable {

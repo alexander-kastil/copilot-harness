@@ -12,8 +12,11 @@
 - Reader for VS Code chat session files across every installed VS Code variant, with incremental rescans (#8).
 - Reader for Copilot CLI session state: workspace, repository, branch, models, tool, subagent and skill counts, and every usage snapshot kept raw (#10).
 - CLAUDE.md for this repo: all tests are allowed.
+- Setup check card: the status of chat sessions, debug logs, the trace database and Copilot CLI data, with in-card buttons that switch on the opt-in sources (#11).
+- Feat: setup check card for the session data sources (#11)
 
 ### Fixed
 
-- Fix: CLI reader counts a missing events.jsonl as no events, not a skipped line (#10)
+- CLI reader counts a missing events.jsonl as no events, not a skipped line (#10).
+- The VSIX ships its yaml and jsonc-parser runtime dependencies.
 

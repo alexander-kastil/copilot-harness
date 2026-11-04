@@ -42,7 +42,18 @@
         "command": "copilotHarness.open",
         "title": "Copilot Harness: Open"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Copilot Harness",
+      "properties": {
+        "copilotHarness.snapshots.maxMegabytes": {
+          "type": "number",
+          "default": 50,
+          "minimum": 1,
+          "markdownDescription": "Size cap of the snapshot store, in megabytes. The store keeps the figures of every Copilot session seen, so they survive Copilot deleting its logs. When the cap is exceeded the oldest records are removed first."
+        }
+      }
+    }
   },
   "scripts": {
     "compile": "tsc -p ./ && npm run webview",

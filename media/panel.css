@@ -53,3 +53,7 @@ h1 { font-size: 1.4em; font-weight: 600; margin: 0 0 16px; }
 .credits-btn { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 0; border-radius: 2px; padding: 4px 12px; cursor: pointer; font: inherit; }
 .credits-btn:hover { background: var(--vscode-button-hoverBackground); }
 .credits-secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
+
+/* snapshots card */
+.snapshots-meta { color: var(--vscode-descriptionForeground); }
+.snapshots-warn { padding: 8px 10px; border: 1px solid var(--vscode-inputValidation-warningBorder, #d29922); }

@@ -3,9 +3,11 @@ import type { Card } from './types';
 import { welcomeCard } from './welcome';
 import { setupCard } from './setup';
 import { creditsCard } from './credits';
+import { snapshotsCard } from './snapshots';
 
 export const cards: Card[] = [
   welcomeCard,
   setupCard,
   creditsCard,
+  snapshotsCard,
 ];

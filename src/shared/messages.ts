@@ -8,7 +8,8 @@ export type ToWebview =
   | { type: 'theme'; kind: 'light' | 'dark' | 'highContrast' }
   | { type: 'setup'; state: import('./setup').SetupState }
   | { type: 'setupResult'; key: string; ok: boolean; message: string }
-  | { type: 'credits'; state: import('./credits').CreditsState };
+  | { type: 'credits'; state: import('./credits').CreditsState }
+  | { type: 'snapshots'; state: import('./snapshots').SnapshotsState };
 
 /** Webview to host. */
 export type ToHost =
