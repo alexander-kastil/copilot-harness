@@ -37,7 +37,7 @@ Copilot Harness reads all of it read-only. There is no proxy or server. Only num
 | [BYOK models](#byok-models-in-copilot-chat) | Your providers and models in the Copilot Chat model picker, five API modes, keys in VS Code's secret storage |
 | [PAYG models page](#payg-models-page) | Everything Manage BYOK Models does, as a page |
 | [Plugin Hunter](#plugin-hunter) | Copilot proposes a plugin from your skills and agents and creates it in a marketplace you own |
-| [Commit messages and token meter](#commit-messages-and-token-meter) | Commit and pull request messages from a BYOK model, and context use in the status bar |
+| [Commit messages](#commit-messages-and-token-meter) | Commit and pull request messages from a BYOK model |
 
 ## Overview
 
