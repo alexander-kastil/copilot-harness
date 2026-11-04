@@ -13,7 +13,8 @@
 - Reader for Copilot CLI session state: workspace, repository, branch, models, tool, subagent and skill counts, and every usage snapshot kept raw (#10).
 - CLAUDE.md for this repo: all tests are allowed.
 - Setup check card: the status of chat sessions, debug logs, the trace database and Copilot CLI data, with in-card buttons that switch on the opt-in sources (#11).
-- Feat: setup check card for the session data sources (#11)
+- Credits card: reconciles local credit figures per source against the quota used, read from GitHub on request or typed in, and names the source of every figure (#13).
+- Feat: credits card reconciling local credits against the quota (#13)
 
 ### Fixed
 
